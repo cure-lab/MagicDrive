@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Callable, Optional, Union
+import math
+import os
 
 import torch
 import torch.nn.functional as F
@@ -27,6 +29,9 @@ logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 if is_xformers_available():
     import xformers
     import xformers.ops
+    CHECK_XFORMERS = int(os.getenv("CHECK_XFORMERS", "0")) == 1
+    SPLIT_SIZE = int(os.getenv("SPLIT_SIZE", -1))
+    ERROR_TOLERANCE = 0.002
 else:
     xformers = None
 
@@ -160,6 +165,13 @@ class Attention(nn.Module):
                 AttnProcessor2_0() if hasattr(F, "scaled_dot_product_attention") and self.scale_qk else AttnProcessor()
             )
         self.set_processor(processor)
+        self._check_xformers = False
+
+    def set_check_xformers(self):
+        if CHECK_XFORMERS:
+            self._check_xformers = True
+        else:
+            self._check_xformers = False
 
     def set_use_memory_efficient_attention_xformers(
         self, use_memory_efficient_attention_xformers: bool, attention_op: Optional[Callable] = None
@@ -317,13 +329,55 @@ class Attention(nn.Module):
         # The `Attention` class can call different attention processors / attention functions
         # here we simply pass along all tensors to the selected processor class
         # For standard processors that are defined here, `**cross_attention_kwargs` is empty
-        return self.processor(
-            self,
-            hidden_states,
-            encoder_hidden_states=encoder_hidden_states,
-            attention_mask=attention_mask,
-            **cross_attention_kwargs,
-        )
+        run_check = False
+        if self._check_xformers:
+            use_xformers = hasattr(self, "processor") and isinstance(
+                self.processor, (
+                    LoRAXFormersAttnProcessor,
+                    CustomDiffusionXFormersAttnProcessor,
+                    XFormersAttnAddedKVProcessor,
+                    XFormersAttnProcessor,
+                )
+            )
+            if use_xformers:
+                run_check = True
+            else:
+                logger.warn("You set `CHECK_XFORMERS=1` but your attn does not "
+                            "enable xformers.")
+        if run_check:
+            xformers_out = self.processor(
+                self,
+                hidden_states,
+                encoder_hidden_states=encoder_hidden_states,
+                attention_mask=attention_mask,
+                **cross_attention_kwargs,
+            )
+            self.set_use_memory_efficient_attention_xformers(False)
+            with torch.no_grad():
+                normal_out = self.processor(
+                    self,
+                    hidden_states,
+                    encoder_hidden_states=encoder_hidden_states,
+                    attention_mask=attention_mask,
+                    **cross_attention_kwargs,
+                )
+                abs_error = (xformers_out - normal_out).abs() 
+                if (abs_error > ERROR_TOLERANCE).any():
+                    msg = f"xformers error, max abs = {abs_error.max():.2e} "
+                    msg += f"h size: {hidden_states.shape} "
+                    if encoder_hidden_states is not None:
+                        msg += f"e size: {encoder_hidden_states.shape}"
+                    logger.error(msg)
+            self.set_use_memory_efficient_attention_xformers(True)
+            return xformers_out
+        else:
+            return self.processor(
+                self,
+                hidden_states,
+                encoder_hidden_states=encoder_hidden_states,
+                attention_mask=attention_mask,
+                **cross_attention_kwargs,
+            )
 
     def batch_to_head_dim(self, tensor):
         head_size = self.heads
@@ -999,6 +1053,38 @@ class XFormersAttnProcessor:
         attention_mask: Optional[torch.FloatTensor] = None,
         temb: Optional[torch.FloatTensor] = None,
     ):
+        actual_size = hidden_states.shape[0]
+        if SPLIT_SIZE != -1 and actual_size > SPLIT_SIZE:
+            split_steps = math.ceil(actual_size / SPLIT_SIZE)
+            split_steps = min(split_steps, actual_size)
+            hidden_states_out = []
+            _hidden_states = hidden_states.chunk(split_steps)
+            if encoder_hidden_states is None:
+                _encoder_hidden_states = [None] * split_steps
+            else:
+                _encoder_hidden_states = encoder_hidden_states.chunk(
+                    split_steps)
+            assert attention_mask is None
+            assert temb is None
+            for i in range(split_steps):
+                hidden_states_out.append(
+                    self._real_call(
+                        attn, _hidden_states[i], _encoder_hidden_states[i],
+                        attention_mask, temb)
+                )
+            return torch.cat(hidden_states_out, dim=0)
+        else:
+            return self._real_call(
+                attn, hidden_states, encoder_hidden_states, attention_mask,
+                temb)
+
+    def _real_call(self,
+        attn: Attention,
+        hidden_states: torch.FloatTensor,
+        encoder_hidden_states: Optional[torch.FloatTensor] = None,
+        attention_mask: Optional[torch.FloatTensor] = None,
+        temb: Optional[torch.FloatTensor] = None,
+    ):
         residual = hidden_states
 
         if attn.spatial_norm is not None:
@@ -1038,15 +1124,55 @@ class XFormersAttnProcessor:
         key = attn.to_k(encoder_hidden_states)
         value = attn.to_v(encoder_hidden_states)
 
-        query = attn.head_to_batch_dim(query).contiguous()
-        key = attn.head_to_batch_dim(key).contiguous()
-        value = attn.head_to_batch_dim(value).contiguous()
+        # NOTE: xformers induce large error when bs is large. so we do not add
+        # head to batch and split batch size if necessary.
 
-        hidden_states = xformers.ops.memory_efficient_attention(
-            query, key, value, attn_bias=attention_mask, op=self.attention_op, scale=attn.scale
-        )
+        def _split_head(tensor):
+            head_size = attn.heads
+            batch_size, seq_len, dim = tensor.shape
+            tensor = tensor.reshape(batch_size, seq_len, head_size, dim // head_size)
+            return tensor
+
+        def _back_head(tensor):
+            batch_size, seq_len, head_size, dim = tensor.shape
+            tensor = tensor.reshape(batch_size, seq_len, head_size * dim)
+            return tensor
+
+        # query = attn.head_to_batch_dim(query).contiguous()
+        # key = attn.head_to_batch_dim(key).contiguous()
+        # value = attn.head_to_batch_dim(value).contiguous()
+        query = _split_head(query)
+        key = _split_head(key)
+        value = _split_head(value)
+
+        if attention_mask is not None:
+            # from cutlassF
+            # HINT: To use an `attn_bias` with a sequence length that is not a
+            # multiple of 8, you need to ensure memory is aligned by slicing a
+            # bigger tensor.
+            # Example: use `attn_bias = torch.zeros([1, 1, 5, 8])[:,:,:,:5]`
+            # instead of `torch.zeros([1, 1, 5, 5])`
+            b, l1, l2 = attention_mask.shape
+            if attention_mask.stride(-2) % 8 != 0:
+                l1_align = (l1 // 8 + 1) * 8
+                l2_align = (l2 // 8 + 1) * 8
+                attention_mask_align = torch.zeros(
+                    (b, l1_align, l2_align), dtype=attention_mask.dtype,
+                    device=attention_mask.device)
+                attention_mask_align[:, :l1, :l2] = attention_mask
+                attention_mask = attention_mask_align
+
+            hidden_states = xformers.ops.memory_efficient_attention(
+                query, key, value, attn_bias=attention_mask[:, :l1, :l2],
+                op=self.attention_op, scale=attn.scale)
+        else:
+            hidden_states = xformers.ops.memory_efficient_attention(
+                query, key, value, attn_bias=attention_mask,
+                op=self.attention_op, scale=attn.scale)
+
         hidden_states = hidden_states.to(query.dtype)
-        hidden_states = attn.batch_to_head_dim(hidden_states)
+        # hidden_states = attn.batch_to_head_dim(_hidden_states)
+        hidden_states = _back_head(hidden_states)
 
         # linear proj
         hidden_states = attn.to_out[0](hidden_states)

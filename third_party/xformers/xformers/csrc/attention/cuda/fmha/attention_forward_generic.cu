@@ -13,7 +13,7 @@
 #include <ATen/Tensor.h>
 #include <ATen/core/Generator.h>
 #include <ATen/cuda/CUDAContext.h>
-#include <ATen/cuda/CUDAGeneratorImpl.h>
+#include <ATen/CUDAGeneratorImpl.h>
 #include <c10/cuda/CUDAGuard.h>
 #include <c10/util/Optional.h>
 #include <torch/library.h>

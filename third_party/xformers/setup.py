@@ -104,6 +104,11 @@ def get_cuda_version(cuda_dir) -> int:
 
 
 def get_flash_attention_extensions(cuda_version: int, extra_compile_args):
+    torch_version = torch.__version__ .split('+')[0]
+    torch_version = tuple(int(v) for v in torch_version.split("."))
+    if torch_version < (1, 12):
+        print("You Pytorch version cannot load flash attention for xformers.")
+        return []
     # Figure out default archs to target
     DEFAULT_ARCHS_LIST = ""
     if cuda_version > 1100:

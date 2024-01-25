@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 #include <ATen/ATen.h>
-#include <ATen/cuda/CUDAGeneratorImpl.h>
+#include <ATen/CUDAGeneratorImpl.h>
 #include <c10/core/TensorOptions.h>
 #include <curand_kernel.h>
 #include <torch/library.h>

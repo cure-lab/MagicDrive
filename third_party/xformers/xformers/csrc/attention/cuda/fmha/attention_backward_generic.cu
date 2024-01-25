@@ -12,7 +12,7 @@
 #include <ATen/Tensor.h>
 #include <ATen/TensorOperators.h>
 #include <ATen/cuda/CUDAContext.h>
-#include <ATen/cuda/CUDAGeneratorImpl.h>
+#include <ATen/CUDAGeneratorImpl.h>
 #include <c10/cuda/CUDAGuard.h>
 #include <torch/library.h>
 

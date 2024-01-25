@@ -63,6 +63,7 @@ class BasicTransformerBlock(nn.Module):
         final_dropout: bool = False,
     ):
         super().__init__()
+        self._args = {k: v for k, v in locals().items() if k != "self" and not k.startswith("_")}
         self.only_cross_attention = only_cross_attention
 
         self.use_ada_layer_norm_zero = (num_embeds_ada_norm is not None) and norm_type == "ada_norm_zero"

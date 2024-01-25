@@ -20,6 +20,7 @@ import os
 import sys
 from collections import OrderedDict
 from typing import Union
+import warnings
 
 from huggingface_hub.utils import is_jinja_available  # noqa: F401
 from packaging import version
@@ -222,7 +223,7 @@ try:
         import torch
 
         if version.Version(torch.__version__) < version.Version("1.12"):
-            raise ValueError("PyTorch should be >= 1.12")
+            warnings.warn("PyTorch should be >= 1.12")
     logger.debug(f"Successfully imported xformers version {_xformers_version}")
 except importlib_metadata.PackageNotFoundError:
     _xformers_available = False

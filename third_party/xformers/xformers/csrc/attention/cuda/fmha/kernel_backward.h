@@ -16,7 +16,7 @@
 
 #ifdef HAS_PYTORCH
 #include <ATen/cuda/CUDAContext.h>
-#include <ATen/cuda/CUDAGeneratorImpl.h>
+#include <ATen/CUDAGeneratorImpl.h>
 #include <c10/cuda/CUDAGuard.h>
 #include <ATen/cuda/CUDAGraphsUtils.cuh>
 #endif

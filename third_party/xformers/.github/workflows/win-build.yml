@@ -1,0 +1,62 @@
+name: win-build
+
+on:
+  pull_request:
+    paths:
+      - "xformers/csrc/**"
+      - ".github/workflows/win-build.yml"
+      - "setup.py"
+      - "requirements*.txt"
+
+env:
+  FORCE_CUDA: 1
+  MAX_JOBS: 4
+  DISTUTILS_USE_SDK: 1 # otherwise distutils will complain on windows about multiple versions of msvc
+  XFORMERS_BUILD_TYPE: "Release"
+
+jobs:
+  win_build:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - "8.0"
+          - "7.0"
+    name: win-build-${{ matrix.arch }}
+    runs-on: windows-2019
+    env:
+      PY: python3
+      TORCH_CUDA_ARCH_LIST: ${{ matrix.arch }}
+
+    timeout-minutes: 360
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Recursive checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: "."
+
+      - name: Setup Runner
+        uses: ./.github/actions/setup-windows-runner
+        with:
+          cuda: "11.6.2"
+          python: "3.8"
+
+      - name: Install build dependencies
+        run: |
+          $PY -m pip install wheel setuptools ninja torch==2.0.0 -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu117
+          git config --global --add safe.directory "*"
+          $PY -c "import torch; print('torch', torch.__version__)"
+          $PY -c "import torch; print('torch.cuda', torch.version.cuda)"
+
+      - name: Create sdist
+        run: $PY setup.py sdist
+
+      - name: Build from sdist
+        run: $PY -m pip install -v dist/*
+
+      - name: Info
+        run: $PY -m xformers.info

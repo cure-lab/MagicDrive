@@ -1,0 +1,35 @@
+# Get core deps.
+-r requirements.txt
+
+
+# Tools for static checking.
+black == 22.3.0
+flake8 == 3.8.4
+flake8-copyright
+isort == 5.7.0
+mypy == 0.982
+pyre-check == 0.9.16
+pyre-extensions == 0.0.29
+click == 8.0.4
+protobuf==3.20.2
+
+# Tools for unit tests & coverage.
+pytest == 7.2.0
+pytest-cov == 2.10.0
+pytest-mpi == 0.4
+pytest-timeout == 1.4.2
+git+https://github.com/rwightman/pytorch-image-models@v0.4.5#egg=timm
+
+# Dependency for factory
+hydra-core >= 1.1
+
+# Dependency for Mixture of Experts
+fairscale >= 0.4.5
+scipy
+
+# Dependency for fused layers, optional
+cmake
+#triton==2.0.0.dev20221105
+#git+https://github.com/openai/triton.git#subdirectory=python&egg=triton
+git+https://github.com/fmassa/triton.git@max_jobs#subdirectory=python&egg=triton
+networkx

@@ -1,0 +1,60 @@
+name: wheels
+
+on:
+  pull_request:
+    paths:
+      - "packaging/compute_wheel_version.sh"
+      - ".github/workflows/wheel*"
+      - "setup.py"
+      - "requirements*.txt"
+  push:
+    branches:
+      - main
+    tags:
+      - "v[0-9]+*"
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - windows-2019
+        python:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+        config:
+          - torch_version: "2.0.0"
+            cuda_short_version: "118"
+            publish: true
+
+          - torch_version: "1.13.1"
+            cuda_short_version: "117"
+            publish: false
+
+          - torch_version: "1.12.1"
+            cuda_short_version: "116"
+            publish: false
+        include:
+          - sdist: false
+          # publish source distribution only from this runner
+          - os: ubuntu-22.04
+            python: "3.10"
+            torch_version: "2.0.0"
+            sdist: true
+
+    uses: ./.github/workflows/wheels_reusable.yml
+    if: github.repository == 'facebookresearch/xformers' || github.event_name == 'pull_request'
+    with:
+      os: ${{ matrix.os }}
+      python: ${{ matrix.python }}
+      torch_version: ${{ matrix.config.torch_version }}
+      cuda_short_version: ${{ matrix.config.cuda_short_version }}
+      publish: ${{ matrix.config.publish == true && github.event_name != 'pull_request'}}
+      sdist: ${{ matrix.config.sdist == true }}
+      twine_username: __token__
+    secrets:
+      twine_password: ${{ secrets.PYPI_TOKEN }}
+

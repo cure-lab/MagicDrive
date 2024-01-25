@@ -1,0 +1,48 @@
+- sections:
+  - local: index
+    title: "🧨 Diffusers"
+  - local: quicktour
+    title: "훑어보기"
+  - local: in_translation
+    title: Stable Diffusion
+  - local: installation
+    title: "설치"
+  title: "시작하기"
+
+- sections:
+  - sections:
+    - local: in_translation
+      title: 개요
+    - local: in_translation
+      title: Unconditional 이미지 생성
+    - local: in_translation
+      title: Textual Inversion
+    - local: training/dreambooth
+      title: DreamBooth
+    - local: training/text2image
+      title: Text-to-image
+    - local: training/lora
+      title: Low-Rank Adaptation of Large Language Models (LoRA)
+    - local: in_translation
+      title: ControlNet
+    - local: in_translation
+      title: InstructPix2Pix 학습
+    title: 학습
+- sections:
+  - local: in_translation
+    title: 개요
+  - local: optimization/fp16
+    title: 메모리와 속도
+  - local: in_translation
+    title: Torch2.0 지원
+  - local: optimization/xformers
+    title: xFormers
+  - local: optimization/onnx
+    title: ONNX
+  - local: optimization/open_vino
+    title: OpenVINO
+  - local: optimization/mps
+    title: MPS
+  - local: optimization/habana
+    title: Habana Gaudi
+  title: 최적화/특수 하드웨어

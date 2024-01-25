@@ -1,0 +1,27 @@
+defaults:
+  - _self_
+  - model: SDv1.5mv_rawbox
+  - dataset: Nuscenes_cache
+  - accelerator: default
+  - runner: default
+
+task_id: "0.0.0"
+log_root_prefix: ./magicdrive-log
+projname: ${model.name}
+hydra:
+  run:
+    dir: ${log_root_prefix}/${projname}_${now:%Y-%m-%d}_${now:%H-%M}_${task_id}
+  output_subdir: hydra
+
+try_run: false
+debug: false
+log_root: ???
+init_method: env://
+seed: 42
+fix_seed_within_batch: false
+
+resume_from_checkpoint: null
+resume_reset_scheduler: false
+validation_only: false
+# num_gpus: 1
+# num_workers: 4

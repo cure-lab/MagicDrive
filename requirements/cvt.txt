@@ -1,0 +1,6 @@
+# cvt
+pytorch-lightning==1.6.2
+imgaug==0.4.0
+fvcore==0.1.5.post20210825
+efficientnet-pytorch==0.7.1
+wandb  # for training

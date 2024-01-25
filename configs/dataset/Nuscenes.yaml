@@ -1,0 +1,288 @@
+dataset_type: NuScenesDataset
+dataset_root: data/nuscenes/
+dataset_process_root: data/nuscenes_mmdet3d_2/  # with visibility
+dataset_cache_file_tag: null
+dataset_cache_file:
+  - null  # for train_pipeline
+  - null  # for test_pipeline
+
+template: A driving scene image at {location}. {description}.
+
+# point_cloud_range: [-51.2, -51.2, -5.0, 51.2, 51.2, 3.0]
+# voxel_size: [0.1, 0.1, 0.2]
+# image_size: [256, 704]  # size of devfusion
+image_size: [224, 400]
+map_bound:
+  x: [-50.0, 50.0, 0.5]
+  y: [-50.0, 50.0, 0.5]
+
+view_order:
+  - "CAM_FRONT_LEFT"
+  - "CAM_FRONT"
+  - "CAM_FRONT_RIGHT"
+  - "CAM_BACK_RIGHT"
+  - "CAM_BACK"
+  - "CAM_BACK_LEFT"
+
+neighboring_view_pair:
+  0: [5, 1]
+  1: [0, 2]
+  2: [1, 3]
+  3: [2, 4]
+  4: [3, 5]
+  5: [4, 0]
+
+back_resize: [896, 1600]  # (h, w)
+back_pad: [0, 4, 0, 0]  # left, top, right and bottom
+
+augment2d:
+  resize: [[0.25, 0.25]]
+  rotate: null
+
+aux_data:  # order is fix (v, c_offset, c_ohw, h), here only existence
+  - visibility  # 1
+  - center_offset  # 2
+  - center_ohw  # 4 = 2 + 2
+  - height  # height of 3d bbox
+# augment2d:
+#   resize: [[0.38, 0.55], [0.48, 0.48]]  # [train, test]
+#   rotate: [-5.4, 5.4]
+#   gridmask:
+#     prob: 0.0
+#     fixed_prob: true
+
+augment3d:
+  scale: [1.0, 1.0]  # adjust the scale
+  rotate: [0.0, 0.0]  # rotation the lidar
+  translate: 0  # shift
+  flip_ratio: 0.0
+  flip_direction: null
+
+# class name conversion is done through pre-process
+# re-order according to this list is done in NuScenesDataset.get_ann_info
+object_classes:
+  - car
+  - truck
+  - construction_vehicle
+  - bus
+  - trailer
+  - barrier
+  - motorcycle
+  - bicycle
+  - pedestrian
+  - traffic_cone
+
+map_classes:
+  - drivable_area
+  # - drivable_area*
+  - ped_crossing
+  - walkway
+  - stop_line
+  - carpark_area
+  - road_divider
+  - lane_divider
+  # - divider
+  - road_block
+
+input_modality:
+  use_lidar: false
+  use_camera: true
+  use_radar: false
+  use_map: false
+  use_external: false
+
+train_pipeline:
+  -
+    type: LoadMultiViewImageFromFiles
+    to_float32: true
+  -
+    type: LoadAnnotations3D
+    with_bbox_3d: true
+    with_label_3d: true
+    with_attr_label: False
+  -
+    type: ImageAug3D  # random crop and rotate image and generate extrinsics
+    final_dim: ${...image_size}
+    resize_lim: ${...augment2d.resize[0]}  # range for resize ratio
+    bot_pct_lim: [0.0, 0.0]  # this is the ratio in [0, 1] to keep bottom, default only crop top
+    rot_lim: ${...augment2d.rotate}
+    rand_flip: false
+    is_train: false  # is false, range takes mean, disable flip and rotate
+  -
+    type: GlobalRotScaleTrans
+    resize_lim: ${...augment3d.scale}
+    rot_lim: ${...augment3d.rotate}
+    trans_lim: ${...augment3d.translate}
+    is_train: true
+  -
+    type: ObjectNameFilter  # this removes -1, do not really filter by names
+    classes: ${...object_classes}
+  -
+    type: LoadBEVSegmentation
+    dataset_root: ${...dataset_root}
+    xbound: ${...map_bound.x}
+    ybound: ${...map_bound.y}
+    classes: ${...map_classes}
+    object_classes: ${...object_classes}
+    aux_data: ${...aux_data}
+    cache_file: ${...dataset_cache_file.0}
+  - 
+    type: RandomFlip3DwithViews
+    flip_ratio: ${...augment3d.flip_ratio}
+    direction: ${...augment3d.flip_direction}
+  # -
+  #   type: RandomFlip3D  # random flip the whole lidar space
+  # -
+  #   type: PointsRangeFilter
+  #   point_cloud_range: ${point_cloud_range}
+  # -
+  #   type: ObjectRangeFilter
+  #   point_cloud_range: ${point_cloud_range}
+  - 
+    type: ReorderMultiViewImages
+    order: ${...view_order}
+    safe: False
+  -
+    type: ImageNormalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+  -
+    type: DefaultFormatBundle3D
+    classes: ${...object_classes}
+  -
+    type: Collect3D
+    keys:  # keep as origin
+      - img
+      # - points
+      - gt_bboxes_3d
+      - gt_labels_3d
+      - gt_masks_bev
+      - gt_aux_bev
+    meta_keys:  # send to DataContainer
+      - camera_intrinsics
+      - lidar2ego
+      - lidar2camera
+      - camera2lidar
+      - lidar2image
+      - img_aug_matrix
+      # - lidar_aug_matrix  # this is useful when we change lidar and box
+    meta_lis_keys:  # hold by one DataContainer
+      - timeofday
+      - location
+      - description
+      - filename
+      - token
+
+test_pipeline:
+  -
+    type: LoadMultiViewImageFromFiles
+    to_float32: true
+  -
+    type: LoadAnnotations3D
+    with_bbox_3d: true
+    with_label_3d: true
+    with_attr_label: False
+  -
+    type: ImageAug3D  # keep this to perform image resize
+    final_dim: ${...image_size}
+    resize_lim: ${...augment2d.resize[0]}
+    bot_pct_lim: [0.0, 0.0]
+    rot_lim: [0.0, 0.0]
+    rand_flip: false
+    is_train: false
+  -
+    type: GlobalRotScaleTrans  # add `lidar_aug_matrix`
+    resize_lim: ${...augment3d.scale}
+    rot_lim: ${...augment3d.rotate}
+    trans_lim: ${...augment3d.translate}
+    is_train: true
+  -
+    type: ObjectNameFilter
+    classes: ${...object_classes}
+  -
+    type: LoadBEVSegmentation
+    dataset_root: ${...dataset_root}
+    xbound: ${...map_bound.x}
+    ybound: ${...map_bound.y}
+    classes: ${...map_classes}
+    object_classes: ${...object_classes}
+    aux_data: ${...aux_data}
+    cache_file: ${...dataset_cache_file.1}
+  # -
+  #   type: PointsRangeFilter
+  #   point_cloud_range: ${point_cloud_range}
+  - 
+    type: ReorderMultiViewImages
+    order: ${...view_order}
+    safe: False
+  -
+    type: ImageNormalize
+    mean: [0.5, 0.5, 0.5]
+    std: [0.5, 0.5, 0.5]
+  -
+    type: DefaultFormatBundle3D
+    classes: ${...object_classes}
+  -
+    type: Collect3D
+    keys:
+      - img
+      # - points
+      - gt_bboxes_3d
+      - gt_labels_3d
+      - gt_masks_bev
+      - gt_aux_bev
+    meta_keys:
+      - camera_intrinsics
+      - lidar2ego
+      - lidar2camera
+      - camera2lidar
+      - lidar2image
+      - img_aug_matrix
+      # - lidar_aug_matrix
+    meta_lis_keys:
+      - timeofday
+      - location
+      - description
+      - filename
+      - token
+
+data:
+  # samples_per_gpu: 4  # we do not set these here.
+  # workers_per_gpu: 4
+  train:  # here we drop the wrapper of CBGSDataset
+    type: ${...dataset_type}
+    dataset_root: ${...dataset_root}
+    ann_file: ${...dataset_process_root}nuscenes_infos_train.pkl
+    pipeline: ${...train_pipeline}
+    object_classes: ${...object_classes}
+    map_classes: ${...map_classes}
+    modality: ${...input_modality}
+    test_mode: false
+    # use_valid_flag: true  # this will filter some objects, not sure why
+    force_all_boxes: true  # !! even without `use_valid_flag`, objects with no lidar pts will be filtered
+    box_type_3d: LiDAR  # this is ok, all boxes are under the lidar coord
+    filter_empty_gt: false  # important, prevent from filter
+  val:
+    type: ${...dataset_type}
+    dataset_root: ${...dataset_root}
+    ann_file: ${...dataset_process_root}nuscenes_infos_val.pkl
+    pipeline: ${...test_pipeline}
+    object_classes: ${...object_classes}
+    map_classes: ${...map_classes}
+    modality: ${...input_modality}
+    test_mode: false
+    force_all_boxes: true  # !! even without `use_valid_flag`, objects with no lidar pts will be filtered
+    box_type_3d: LiDAR
+    filter_empty_gt: false  # important, prevent from filter
+  test:
+    type: ${...dataset_type}
+    dataset_root: ${...dataset_root}
+    ann_file: ${...dataset_process_root}nuscenes_infos_val.pkl
+    pipeline: ${...test_pipeline}
+    object_classes: ${...object_classes}
+    map_classes: ${...map_classes}
+    modality: ${...input_modality}
+    test_mode: true
+    force_all_boxes: true  # !! even without `use_valid_flag`, objects with no lidar pts will be filtered
+    box_type_3d: LiDAR
+    filter_empty_gt: false  # important, prevent from filter

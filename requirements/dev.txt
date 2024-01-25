@@ -1,0 +1,29 @@
+# python 3.7
+torch==1.10.2
+torchvision==0.11.3
+tensorboard==2.11.2  # pytorch need this. do not use tensorboardX
+hydra-core==1.3.0
+urllib3==1.26.12  # avoid annoying issue.
+h5py>=3.8.0  # we may need version >=3.5.0. tried with 3.8.0
+einops==0.3.2
+accelerate==0.20.3
+transformers==4.27.4  # for diffusers
+mmcv-full==1.4.5
+
+# from mmdet3d (bevfusion)
+Pillow==8.4.0
+nuscenes-devkit
+numpy==1.21.6
+numba==0.53.0  # for numpy==1.21.6
+llvmlite==0.36.0
+mmdet==2.20.0  # cannot run on 8 GPUs with 2.28.2
+opencv-python==4.6.0.66  # visualization requires >=4.5.5.64
+ninja
+
+# diffusers==0.17.1  # from third-party
+# mmdet3d  # from bevfusion
+
+# (optional)
+# xformers  # from third-party
+# triton  # >2.0.0post1, 2.0.0post1 is buggy, any later version should fix
+# deepspeed  # >=0.9.5+1491e14e, 0.9.5 cannot work

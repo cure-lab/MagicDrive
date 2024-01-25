@@ -18,9 +18,74 @@ In MagicDrive, we employ two strategies (cross-attention and additive encoder br
 
 ![image-20231011165634648](./assets/overview.png)
 
+## TODO
+
+- [x] [config](configs/exp/224x400.yaml) and [pretrained weight](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/ERiu-lbAvq5IkODTscFXYPUBpVYVDbwjHchDExBlPfeQ0w?e=8YaDM0) for base resolution (224x400)
+- [x] demo for base resolution (224x400)
+- [ ] train and test code release
+- [ ] config and pretrained weight for high resolution
+- [ ] train and test code for CVT and BEVFusion
+
+## Getting Started
+
+### Environment Setup
+
+Clone this repo with submodules
+
+```bash
+git clone --recursive https://github.com/cure-lab/MagicDrive.git
+```
+
+The code is tested with `Pytorch==1.10.2` and `cuda 10.2` on V100 servers. To setup the python environment, follow:
+
+```bash
+cd ${ROOT}
+pip install -r requirements/dev.txt
+```
+
+We opt to install the source code for the following packages, with `cd ${FOLDER}; pip install .`
+
+```bash
+# install third-party
+third_party/
+├── bevfusion -> based on db75150
+├── diffusers -> based on v0.17.1 (afcca39)
+└── xformers  -> based on v0.0.19 (8bf59c9), optional
+```
+
+see [note about our xformers](doc/xformers.md)
+
+Setup default configuration for accelearte with
+```bash
+accelerate config
+```
+
+Our default log directory is `${ROOT}/magicdrive-log`. Please be prepared.
+
+### Pretrained Weights
+
+Our training are based on [stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5). We assume you put them at `${ROOT}/pretrained/` as follows:
+
+```bash
+{ROOT}/pretrained/stable-diffusion-v1-5/
+├── text_encoder
+├── tokenizer
+├── unet
+├── vae
+└── ...
+```
+
 ## Street-view Generation with MagicDrive
 
-Coming soon.
+Download our pretrained weight for MagicDrive from [onedrive](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/ERiu-lbAvq5IkODTscFXYPUBpVYVDbwjHchDExBlPfeQ0w?e=8YaDM0) and put it in `${ROOT}/pretrained/`
+
+**Run our demo**
+
+```bash
+cd ${ROOT}
+python demo/run.py resume_from_checkpoint=magicdrive-log/SDv1.5mv-rawbox_2023-09-07_18-39_224x400
+```
+The generated images will be located in `magicdrive-log/test`. More information can be find in [demo doc](demo/readme.md).
 
 ## Train MagicDrive
 
@@ -47,11 +112,18 @@ More results can be found in the main paper.
 ## Cite Us
 
 ```bibtex
-@article{gao2023magicdrive,
-  title={MagicDrive: Street View Generation with Diverse 3D Geometry Control},
+@inproceedings{gao2023magicdrive,
+  title={{MagicDrive}: Street View Generation with Diverse 3D Geometry Control},
   author={Gao, Ruiyuan and Chen, Kai and Xie, Enze and Hong, Lanqing and Li, Zhenguo and Yeung, Dit-Yan and Xu, Qiang},
-  journal={arXiv preprint arXiv:2310.02601},
-  year={2023}
+  booktitle = {International Conference on Machine Learning},
+  year={2024}
 }
 ```
 
+## Credit
+
+We adopt following open-sourced projects:
+
+- [bevfusion](https://github.com/mit-han-lab/bevfusion): dataloader to handle 3d bounding boxes and BEV map
+- [diffusers](https://github.com/huggingface/diffusers): framework to train stable diffusion
+- [xformers](https://github.com/facebookresearch/xformers): accelerator for attention mechanism

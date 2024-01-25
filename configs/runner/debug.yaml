@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+  # - override /model: StableDiffusion-v2.1
+  - /runner/default
+  - _self_  # make sure override
+
+runner:
+  checkpointing_steps: 5
+  validation_steps: 5
+  max_train_steps: 7  # if set, will ignore epoch num and break
+  lr_scheduler: constant
+  display_per_epoch: 3125  # so that tqdm updates per 2 iters
+  validation_times: 2
+  validation_index: [204, 912, 1828]
+
+try_run: true
+seed: 100 
+log_root_prefix: ./magicdrive-log/debug

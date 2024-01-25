@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes
+
+dataset:
+  dataset_cache_file_tag: 26x200x200_map_aux_full
+  dataset_cache_file:
+    - ${dataset.dataset_process_root}../nuscenes_map_aux/train_${dataset.dataset_cache_file_tag}.h5
+    - ${dataset.dataset_process_root}../nuscenes_map_aux/val_${dataset.dataset_cache_file_tag}.h5

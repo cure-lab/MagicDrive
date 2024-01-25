@@ -1,0 +1,56 @@
+name: SDv1.5mv-rawbox
+pretrained_model_name_or_path: pretrained/stable-diffusion-v1-5/
+bbox_mode: 'all-xyz'
+bbox_view_shared: false
+crossview_attn_type: basic
+train_with_same_noise: false
+train_with_same_t: true
+
+runner_module: magicdrive.runner.multiview_runner.MultiviewRunner
+
+pipe_module: magicdrive.pipeline.pipeline_bev_controlnet.StableDiffusionBEVControlNetPipeline
+
+unet_module: magicdrive.networks.unet_2d_condition_multiview.UNet2DConditionModelMultiview
+use_fp32_for_unet_trainable: true
+unet_dir: unet
+unet:
+  trainable_state: only_new  # only_new or all
+  neighboring_view_pair: ${dataset.neighboring_view_pair}
+  neighboring_attn_type: add
+  zero_module_type: zero_linear
+  crossview_attn_type: ${..crossview_attn_type}
+  img_size: ${dataset.image_size}
+    
+model_module: magicdrive.networks.unet_addon_rawbox.BEVControlNetModel
+controlnet_dir: controlnet
+controlnet:
+  # 7 param to embed: 3 for intrinsics + 4 for extrinsics
+  # in_dim 3, num_freqs 4 -> 27 dim embedding
+  camera_in_dim: 189
+  camera_out_dim: 768
+  map_size: [8, 200, 200]
+  conditioning_embedding_out_channels: [16, 32, 96, 256]
+
+  # for uncond camera param, learnable
+  uncond_cam_in_dim: [3, 7]
+  use_uncond_map: null  # negative1, random or learnable
+  drop_cond_ratio: 0.25
+  drop_cam_num: 6
+  drop_cam_with_box: false
+
+  cam_embedder_param:
+    input_dims: 3
+    num_freqs: 4  # nerf use 4 for view embedding
+    include_input: True
+    log_sampling: True
+
+  bbox_embedder_cls: magicdrive.networks.bbox_embedder.ContinuousBBoxWithTextEmbedding
+  bbox_embedder_param:
+    n_classes: 10
+    class_token_dim: 768
+    trainable_class_token: false
+    use_text_encoder_init: true
+    embedder_num_freq: 4
+    proj_dims: [768, 512, 512, 768]
+    mode: ${...bbox_mode}
+    minmax_normalize: false

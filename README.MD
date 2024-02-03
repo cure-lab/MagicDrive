@@ -53,7 +53,7 @@ third_party/
 └── xformers  -> based on v0.0.19 (8bf59c9), optional
 ```
 
-see [note about our xformers](doc/xformers.md)
+see [note about our xformers](doc/xformers.md). If you have issues with environment setup, please check [FAQ](doc/FAQ.md) first.
 
 Setup default configuration for accelearte with
 ```bash

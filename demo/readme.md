@@ -38,3 +38,13 @@ python demo/run.py \
 The generated results will be located at `magicdrive-log/test`.
 
 Similar to the command above, changing `run.py` to `run_cond_on_view.py` can generate camera views condition on one given view.
+
+### Interactive GUI
+Install `gradio` before running:
+```bash
+pip install gradio
+```
+Make sure you can run the demo above, then launch the GUI through:
+```bash
+python demo/interactive_gui.py
+```

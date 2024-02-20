@@ -22,6 +22,7 @@ In MagicDrive, we employ two strategies (cross-attention and additive encoder br
 
 - [x] [config](configs/exp/224x400.yaml) and [pretrained weight](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/ERiu-lbAvq5IkODTscFXYPUBpVYVDbwjHchDExBlPfeQ0w?e=8YaDM0) for base resolution (224x400)
 - [x] demo for base resolution (224x400)
+- [x] GUI for interactive bbox editing
 - [ ] train and test code release
 - [ ] config and pretrained weight for high resolution
 - [ ] train and test code for CVT and BEVFusion
@@ -41,6 +42,12 @@ The code is tested with `Pytorch==1.10.2` and `cuda 10.2` on V100 servers. To se
 ```bash
 cd ${ROOT}
 pip install -r requirements/dev.txt
+# continue to install `third_party`s
+
+# otherwise, to run GUI only
+pip install -r requirements/gui.txt
+# our GUI does not need mm-series packages.
+# please also install diffusers from `third_party`.
 ```
 
 We opt to install the source code for the following packages, with `cd ${FOLDER}; pip install .`
@@ -81,6 +88,14 @@ Download our pretrained weight for MagicDrive from [onedrive](https://mycuhk-my.
 
 **Run our demo**
 
+We recommand users to run our interactive GUI first, because we have minimize the dependencies for GUI demo.
+```bash
+cd ${ROOT}
+python demo/interactive_gui.py
+# a gradio-based gui, use your web browser
+```
+
+Run our demo for camera view generation.
 ```bash
 cd ${ROOT}
 python demo/run.py resume_from_checkpoint=magicdrive-log/SDv1.5mv-rawbox_2023-09-07_18-39_224x400

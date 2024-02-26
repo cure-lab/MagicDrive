@@ -376,16 +376,17 @@ if __name__ == "__main__":
         write_version_file(version)
 
     is_building_wheel = "bdist_wheel" in sys.argv
+    # TODO: We skip flash-attention as it is not supported on V100.
     # Embed a fixed version of flash_attn
     # NOTE: The correct way to do this would be to use the `package_dir`
     # parameter in `setuptools.setup`, but this does not work when
     # developing in editable mode
     # See: https://github.com/pypa/pip/issues/3160 (closed, but not fixed)
-    symlink_package(
-        "xformers._flash_attn",
-        Path("third_party") / "flash-attention" / "flash_attn",
-        is_building_wheel,
-    )
+    # symlink_package(
+    #     "xformers._flash_attn",
+    #     Path("third_party") / "flash-attention" / "flash_attn",
+    #     is_building_wheel,
+    # )
     extensions, extensions_metadata = get_extensions()
     setuptools.setup(
         name="xformers",

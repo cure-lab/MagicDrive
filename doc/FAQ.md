@@ -34,3 +34,14 @@ python setup.py develop
 ```
 
 Now, you should be able to run our demo.
+
+### Q3: [Error] nvcc fatal   : Unsupported gpu architecture 'compute_80'
+
+This may appear when you install bevfusion (mmdet3d) on cuda10.2. The latest version of bevfusion supports Ampere GPUs by hard-coding compile parameters, leading to error when compiled with cuda10.2. One can get rid of this error by comment these lines in `third_party/bevfusion/setup.py (L19)`.
+```python
+"-D__CUDA_NO_HALF2_OPERATORS__",
+"-gencode=arch=compute_70,code=sm_70",
+"-gencode=arch=compute_75,code=sm_75",
+# "-gencode=arch=compute_80,code=sm_80",
+# "-gencode=arch=compute_86,code=sm_86",
+```

@@ -23,7 +23,7 @@ In MagicDrive, we employ two strategies (cross-attention and additive encoder br
 - [x] [config](configs/exp/224x400.yaml) and [pretrained weight](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/ERiu-lbAvq5IkODTscFXYPUBpVYVDbwjHchDExBlPfeQ0w?e=8YaDM0) for base resolution (224x400)
 - [x] demo for base resolution (224x400)
 - [x] GUI for interactive bbox editing
-- [ ] train and test code release
+- [x] train and test code release
 - [ ] config and pretrained weight for high resolution
 - [ ] train and test code for CVT and BEVFusion
 
@@ -50,7 +50,7 @@ pip install -r requirements/gui.txt
 # please also install diffusers from `third_party`.
 ```
 
-We opt to install the source code for the following packages, with `cd ${FOLDER}; pip install .`
+We opt to install the source code for the following packages, with `cd ${FOLDER}; pip -vvv install .`
 
 ```bash
 # install third-party
@@ -104,7 +104,69 @@ The generated images will be located in `magicdrive-log/test`. More information 
 
 ## Train MagicDrive
 
-Coming soon.
+### Prepare Data
+We prepare the nuScenes dataset similar to [bevfusion's instructions](https://github.com/mit-han-lab/bevfusion#data-preparation). Specifically,
+
+1. Download the nuScenes dataset from the [website](https://www.nuscenes.org/nuscenes) and put them in `./data/`. You should have these files:
+    ```bash
+    data/nuscenes
+    ├── maps
+    ├── mini
+    ├── samples
+    ├── sweeps
+    ├── v1.0-mini
+    └── v1.0-trainval
+    ```
+2. Generate mmdet3d annotation files by:
+    ```bash
+    python tools/create_data.py nuscenes --root-path ./data/nuscenes \
+      --out-dir ./data/nuscenes_mmdet3d_2 --extra-tag nuscenes
+    ```
+    You should have these files:
+    ```bash
+    data/nuscenes_mmdet3d_2
+    ├── nuscenes_dbinfos_train.pkl (-> ${bevfusion-version}/nuscenes_dbinfos_train.pkl)
+    ├── nuscenes_gt_database (-> ${bevfusion-version}/nuscenes_gt_database)
+    ├── nuscenes_infos_train.pkl
+    └── nuscenes_infos_val.pkl
+    ```
+    Note: As shown above, some files can be soft-linked with the original version from bevfusion. If some of the files is located in `data/nuscenes`, you can move them to `data/nuscenes_mmdet3d_2` manually.
+
+3. (Optional) To accelerate data loading, we prepared cache files in h5 format for BEV maps. They can be generated through `tools/prepare_map_aux.py` with different configs in `configs/dataset`. For example:
+    ```bash
+    python tools/prepare_map_aux.py +process=train
+    python tools/prepare_map_aux.py +process=val
+    ```
+    You will have files like `./val_tmp.h5` and `./train_tmp.h5`. You have to rename the cache files correctly after generating them. Our default is
+    ```bash
+    data/nuscenes_map_aux
+    ├── train_26x200x200_map_aux_full.h5 (42G)
+    └── val_26x200x200_map_aux_full.h5 (9G)
+    ```
+
+### Train the model
+
+Launch training with (with 8xV100):
+```bash
+accelerate launch --mixed_precision fp16 --gpu_ids all --num_processes 8 tools/train.py \
+  +exp=224x400 runner=8gpus
+```
+During training, you can check tensorboard for the log and intermediate results.
+
+Besides, we provides debug config to test your environment and data loading process (with 2xV100):
+```bash
+accelerate launch --mixed_precision fp16 --gpu_ids all --num_processes 2 tools/train.py \
+  +exp=224x400 runner=debug runner.validation_before_run=true
+```
+
+### Test the model
+After training, you can test your model for driving view generation through:
+```bash
+python tools/test.py resume_from_checkpoint=${YOUR MODEL}
+# take our pretrained model as an example
+python tools/test.py resume_from_checkpoint=magicdrive-log/SDv1.5mv-rawbox_2023-09-07_18-39_224x400
+```
+Please find the results in `./magicdrive-log/test/`.
 
 ## Quantitative Results
 

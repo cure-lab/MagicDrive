@@ -1,6 +1,6 @@
 # python 3.7
-torch==1.10.2
-torchvision==0.11.3
+# torch==1.10.2
+# torchvision==0.11.3
 tensorboard==2.11.2  # pytorch need this. do not use tensorboardX
 hydra-core==1.3.0
 urllib3==1.26.12  # avoid annoying issue.

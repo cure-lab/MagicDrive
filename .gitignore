@@ -9,6 +9,7 @@ tmp/*
 .tmp/*
 cvt-outputs/*
 pretrained/*
+data/*
 
 !perception/cross_view_transformers/splits/scene_gen.txt
 !.gitkeep

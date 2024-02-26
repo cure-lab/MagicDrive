@@ -1,4 +1,4 @@
-dataset_type: NuScenesDataset
+dataset_type: NuScenesDatasetM
 dataset_root: data/nuscenes/
 dataset_process_root: data/nuscenes_mmdet3d_2/  # with visibility
 dataset_cache_file_tag: null
@@ -115,10 +115,10 @@ train_pipeline:
     trans_lim: ${...augment3d.translate}
     is_train: true
   -
-    type: ObjectNameFilter  # this removes -1, do not really filter by names
+    type: ObjectNameFilterM  # this removes -1, do not really filter by names
     classes: ${...object_classes}
   -
-    type: LoadBEVSegmentation
+    type: LoadBEVSegmentationM
     dataset_root: ${...dataset_root}
     xbound: ${...map_bound.x}
     ybound: ${...map_bound.y}
@@ -139,7 +139,7 @@ train_pipeline:
   #   type: ObjectRangeFilter
   #   point_cloud_range: ${point_cloud_range}
   - 
-    type: ReorderMultiViewImages
+    type: ReorderMultiViewImagesM
     order: ${...view_order}
     safe: False
   -
@@ -197,10 +197,10 @@ test_pipeline:
     trans_lim: ${...augment3d.translate}
     is_train: true
   -
-    type: ObjectNameFilter
+    type: ObjectNameFilterM
     classes: ${...object_classes}
   -
-    type: LoadBEVSegmentation
+    type: LoadBEVSegmentationM
     dataset_root: ${...dataset_root}
     xbound: ${...map_bound.x}
     ybound: ${...map_bound.y}
@@ -212,7 +212,7 @@ test_pipeline:
   #   type: PointsRangeFilter
   #   point_cloud_range: ${point_cloud_range}
   - 
-    type: ReorderMultiViewImages
+    type: ReorderMultiViewImagesM
     order: ${...view_order}
     safe: False
   -

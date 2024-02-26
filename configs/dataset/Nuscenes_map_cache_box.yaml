@@ -30,10 +30,10 @@ dataset:
       trans_lim: ${...augment3d.translate}
       is_train: true
     -
-      type: ObjectNameFilter  # this removes -1, do not really filter by names
+      type: ObjectNameFilterM  # this removes -1, do not really filter by names
       classes: ${...object_classes}
     -
-      type: LoadBEVSegmentation
+      type: LoadBEVSegmentationM
       dataset_root: ${...dataset_root}
       xbound: ${...map_bound.x}
       ybound: ${...map_bound.y}
@@ -54,7 +54,7 @@ dataset:
     #   type: ObjectRangeFilter
     #   point_cloud_range: ${point_cloud_range}
     - 
-      type: ReorderMultiViewImages
+      type: ReorderMultiViewImagesM
       order: ${...view_order}
       safe: False
     -
@@ -111,10 +111,10 @@ dataset:
       trans_lim: ${...augment3d.translate}
       is_train: true
     -
-      type: ObjectNameFilter
+      type: ObjectNameFilterM
       classes: ${...object_classes}
     -
-      type: LoadBEVSegmentation
+      type: LoadBEVSegmentationM
       dataset_root: ${...dataset_root}
       xbound: ${...map_bound.x}
       ybound: ${...map_bound.y}
@@ -126,7 +126,7 @@ dataset:
     #   type: PointsRangeFilter
     #   point_cloud_range: ${point_cloud_range}
     - 
-      type: ReorderMultiViewImages
+      type: ReorderMultiViewImagesM
       order: ${...view_order}
       safe: False
     -

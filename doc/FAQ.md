@@ -45,3 +45,7 @@ This may appear when you install bevfusion (mmdet3d) on cuda10.2. The latest ver
 # "-gencode=arch=compute_80,code=sm_80",
 # "-gencode=arch=compute_86,code=sm_86",
 ```
+
+### Q4: video generation
+
+The authors do not have plan to integrate video generation with current codebase. For those who need code for video generation with research purposes, please send email to `rygao@cse.cuhk.edu.hk`.

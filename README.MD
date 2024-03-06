@@ -192,7 +192,7 @@ More results can be found in the main paper.
 @inproceedings{gao2023magicdrive,
   title={{MagicDrive}: Street View Generation with Diverse 3D Geometry Control},
   author={Gao, Ruiyuan and Chen, Kai and Xie, Enze and Hong, Lanqing and Li, Zhenguo and Yeung, Dit-Yan and Xu, Qiang},
-  booktitle = {International Conference on Machine Learning},
+  booktitle = {International Conference on Learning Representations},
   year={2024}
 }
 ```

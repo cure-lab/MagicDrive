@@ -1,0 +1,67 @@
+foreground_loss_mode: null
+foreground_loss_weight: 0.0  # additional scale, used as 1+x
+bbox_drop_ratio: 0
+bbox_add_ratio: 0
+bbox_add_num: 3
+keyframe_rate: 1
+
+num_train_epochs: 100
+train_batch_size: 3
+max_train_steps: null  # if null, will be overwrite by runner
+
+num_workers: 4
+prefetch_factor: 4
+display_per_epoch: 20
+display_per_n_min: 10
+
+max_grad_norm: 1.0
+set_grads_to_none: true
+enable_xformers_memory_efficient_attention: false
+unet_in_fp16: true
+enable_unet_checkpointing: false  # if unet is not trainable, this is useless
+enable_controlnet_checkpointing: false
+noise_offset: 0.0
+train_with_same_offset: true
+
+use_8bit_adam: false
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_weight_decay: 1e-2
+adam_epsilon: 1e-08
+
+# 28130 samples for train
+# 1 gpu -> 9377 batches per epoch
+# 8 gpus -> 1172 batches per epoch
+# 32 gpus -> 293 batches per epoch
+learning_rate: 8e-5
+lr_scheduler: cosine
+gradient_accumulation_steps: 1
+lr_num_cycles: 1
+lr_power: 1.0
+
+# steps parameter
+lr_warmup_steps: 3000
+checkpointing_steps: 500
+validation_steps: 100
+save_model_per_epoch: null
+
+# validation
+validation_before_run: false
+validation_index: [204, 912, 1828, 2253, 4467, 5543]
+validation_times: 4
+validation_batch_size: 1
+validation_show_box: false
+validation_seed_global: false
+
+pipeline_param:
+  guidance_scale: 2  # if > 1, enable classifier-free guidance
+  num_inference_steps: 20
+  eta: 0.0
+  controlnet_conditioning_scale: 1.0
+  guess_mode: false
+  use_zero_map_as_unconditional: false
+  bbox_max_length: null  # on view_shared=False, train max 159, val max 117
+  # normal pipeline do not take this, do not add the param to default config. if
+  # you want to override, use:
+  # +runner.pipeline_param.conditional_latents_change_every_input=true
+  # conditional_latents_change_every_input: true

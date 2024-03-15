@@ -1,0 +1,25 @@
+# real default
+compute_environment: LOCAL_MACHINE
+deepspeed_config: {}
+distributed_type: MULTI_GPU
+downcast_bf16: 'no'
+dynamo_config: {}
+dynamo_backend: 'no'
+fsdp_config: {}
+main_training_function: main
+megatron_lm_config: {}
+rdzv_backend: static
+same_network: true
+tpu_env: []
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false
+gpu_ids: all
+
+# should be changed by command line
+mixed_precision: fp16
+num_machines: 4
+num_processes: 8
+machine_rank: 0
+main_process_ip: 'null'
+main_process_port: 1234

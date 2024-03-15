@@ -1,0 +1,40 @@
+name: SDv1.5mv-rawbox-t
+pretrained_model_name_or_path: ../pretrained/stable-diffusion-v1-5/
+bbox_mode: 'all-xyz'
+bbox_view_shared: false
+crossview_attn_type: basic
+train_with_same_noise: false
+train_with_same_t: true
+
+# temporal
+load_pretrain_from: null
+allow_partial_load: false
+pretrained_magicdrive: ../MagicDrive-pretrained/SDv1.5mv-rawbox_2023-09-07_18-39_224x400
+train_with_same_noise_t: false
+video_length: 7
+sc_attn_index:
+  - [0, 0]  # keyframe
+  - [0, 0]
+  - [0, 1]
+  - [0, 2]
+  - [0, 3]
+  - [0, 4]
+  - [0, 5]  # keyframe
+
+runner_module: magicdrive.runner.multiview_t_runner.MultiviewTRunner
+
+pipe_module: magicdrive.pipeline.pipeline_bev_controlnet_t.StableDiffusionBEVControlNetTPipeline
+
+unet_module: magicdrive.networks.unet_2d_condition_multiview_t.UNet2DConditionModelMultiviewT
+use_fp32_for_unet_trainable: true
+unet_dir: unet
+unet:
+  video_length: ${..video_length}
+  temp_attn_type: t_last
+  temp_pos_emb: learnable
+  zero_module_type2: zero_linear
+  spatial_trainable: false
+
+model_module: magicdrive.networks.unet_addon_rawbox.BEVControlNetModel
+controlnet_dir: controlnet
+controlnet: {}

@@ -1,0 +1,16 @@
+defaults:
+  - config
+  - _self_
+
+log_root_prefix: ../magicdrive-t-log/test
+
+runner:
+  validation_batch_size: 1
+  validation_index: [50, 899, 1324, 1828, 3500] # total 4969
+
+resume_on_exists: false
+show_box: true
+cloud: false
+fps: 2
+
+fix_seed_for_every_generation: False

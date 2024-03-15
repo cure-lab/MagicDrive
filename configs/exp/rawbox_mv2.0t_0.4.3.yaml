@@ -1,0 +1,59 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_map_cache_box_t
+  # - /runner/default_t
+  - model: ../../model/SDv1.5mv_rawbox_t
+  - _self_  # make sure override
+
+# NOTE: we do not handle map explicitly, since on cache miss, our code can get
+# the map from whole nuscenes map correctly. Therefore, we assume map is always
+# available to every frame.
+
+# based on 0.3.5sp, use all adv frames
+task_id: 2.0t_0.4.3
+fps: 12
+runner:
+    # validation_index: [204, 899, 1828, 3090] # total 4969
+    validation_index: [1356, 5967, 12135, 20499] # should match above
+    enable_unet_checkpointing: true
+    pipeline_param:
+      init_noise: rand_all
+      double_cfg_inference: true
+      decode_bs: 7
+      keyframe_rate: 6
+    checkpointing_steps: 5000
+    save_model_per_epoch: 1
+dataset:
+  dataset_cache_file_tag: 26x200x200_12Hz_advanced
+  dataset_cache_dirname: nuscenes_map_aux_12Hz_adv
+  dataset_process_root: ../data/nuscenes_mmdet3d-12Hz/
+  data:
+    train:
+      ann_file: ${...dataset_process_root}nuscenes_advanced_12Hz_infos_train.pkl
+    val:
+      ann_file: ${...dataset_process_root}nuscenes_advanced_12Hz_infos_val.pkl
+    test:
+      ann_file: ${...dataset_process_root}nuscenes_advanced_12Hz_infos_val.pkl
+model:
+  video_length: 16
+  sc_attn_index:
+    - [0, 0, 6, 12]  # keyframe
+    - [0, 6, 0, 1]
+    - [0, 6, 1, 2]
+    - [0, 6, 2, 3]
+    - [0, 6, 3, 4]
+    - [0, 6, 4, 5]
+    - [0, 6, 6, 12]  # keyframe
+    - [6, 12, 6, 7]
+    - [6, 12, 7, 8]
+    - [6, 12, 8, 9]
+    - [6, 12, 9, 10]
+    - [6, 12, 10, 11]
+    - [0, 6, 12, 12] # keyframe
+    - [6, 12, 12, 13]
+    - [6, 12, 13, 14]
+    - [6, 12, 14, 15]
+  unet:
+    temp_attn_type: _s_ff_t_last  # tune-a-video
+    zero_module_type2: none
+    spatial_trainable: true

@@ -1,0 +1,40 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_map_cache_box_t
+  # - /runner/default_t
+  - model: ../../model/SDv1.5mv_rawbox_t
+  - _self_  # make sure override
+
+# NOTE: we do not handle map explicitly, since on cache miss, our code can get
+# the map from whole nuscenes map correctly. Therefore, we assume map is always
+# available to every frame.
+scene_idx: 22
+
+# based on 0.1.3, use non-key frames
+task_id: 2.0t_0.1.3_fake
+dataset:
+  dataset_process_root: ../data/nuscenes_mmdet3d-t-keyframes_fake/
+  data:
+    train:
+      ann_file: ${...dataset_process_root}nuscenes_infos_val-${scene_idx}.pkl
+    val:
+      ann_file: ${...dataset_process_root}nuscenes_infos_val-${scene_idx}.pkl
+    test:
+      ann_file: ${...dataset_process_root}nuscenes_infos_val-${scene_idx}.pkl
+model:
+  unet:
+    temp_attn_type: _s_ff_t_last  # tune-a-video
+    zero_module_type2: none
+
+runner: # for 2 gpus
+  validation_index: [5] # total 4969
+  save_model_per_epoch: 10
+  display_per_epoch: 5
+
+  learning_rate: 3e-5
+  lr_scheduler: constant_with_warmup
+  lr_warmup_steps: 20
+
+  checkpointing_steps: 500
+  validation_steps: 250
+  enable_xformers_memory_efficient_attention: true

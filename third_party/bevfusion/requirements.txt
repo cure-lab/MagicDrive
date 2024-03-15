@@ -1,0 +1,10 @@
+Pillow==8.4.0  # important
+tqdm
+torchpack
+# mmcv==1.2.7
+# mmcv-full==1.7.1
+# mmdet==2.20.0
+nuscenes-devkit
+mpi4py==3.0.3
+numba==0.53.0  # for numpy==1.21.6
+llvmlite==0.36.0

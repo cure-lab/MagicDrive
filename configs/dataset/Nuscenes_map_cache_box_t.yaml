@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_map_cache_box
+
+# this config only remove object items on map construction
+# map size: (8, 200, 200)
+
+dataset:
+  dataset_type: NuScenesTDataset
+  dataset_process_root: ../data/nuscenes_mmdet3d-t-keyframes/
+ 
+  data:
+    train:
+      video_length: ${model.video_length}
+    val:
+      video_length: ${model.video_length}
+    test:
+      video_length: ${model.video_length}

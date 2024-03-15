@@ -1,0 +1,22 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_cache_t
+  # - /runner/default_t
+  - model: ../../model/SDv1.5mv_rawbox_t
+  - _self_  # make sure override
+
+# NOTE: we do not handle map explicitly, since on cache miss, our code can get
+# the map from whole nuscenes map correctly. Therefore, we assume map is always
+# available to every frame.
+
+# use non-key frames
+task_id: map_cache_gen
+dataset:
+  dataset_process_root: ../data/nuscenes_mmdet3d-t-use-break/
+  data:
+    train:
+      ann_file: ${...dataset_process_root}nuscenes_infos_train_t6.pkl
+    val:
+      ann_file: ${...dataset_process_root}nuscenes_infos_val_t6.pkl
+    test:
+      ann_file: ${...dataset_process_root}nuscenes_infos_val_t6.pkl

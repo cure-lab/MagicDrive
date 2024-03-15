@@ -1,0 +1,56 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_map_cache_box_t
+  # - /runner/default_t
+  - model: ../../model/SDv1.5mv_rawbox_t
+  - _self_  # make sure override
+
+# NOTE: we do not handle map explicitly, since on cache miss, our code can get
+# the map from whole nuscenes map correctly. Therefore, we assume map is always
+# available to every frame.
+
+# based on 0.3.3, use non-key frames with longer video
+task_id: 2.0t_0.3.4
+fps: 12
+runner:
+    # validation_index: [204, 899, 1828, 3090] # total 4969
+    validation_index: [106, 483, 1007, 1888] # should match above
+    enable_unet_checkpointing: true
+    pipeline_param:
+      double_cfg_inference: true
+      decode_bs: 7
+      keyframe_rate: 6
+dataset:
+  dataset_cache_file_tag: 8x200x200_map_use-break
+  dataset_cache_dirname: nuscenes_map_cache_t-use-break
+  dataset_process_root: ../data/nuscenes_mmdet3d-t-use-break/
+  data:
+    train:
+      ann_file: ${...dataset_process_root}nuscenes_infos_train_t6.pkl
+    val:
+      ann_file: ${...dataset_process_root}nuscenes_infos_val_t6.pkl
+    test:
+      ann_file: ${...dataset_process_root}nuscenes_infos_val_t6.pkl
+model:
+  video_length: 16
+  sc_attn_index:
+    - [0, 6, 12]  # keyframe
+    - [0, 6, 0]
+    - [0, 6, 1]
+    - [0, 6, 2]
+    - [0, 6, 3]
+    - [0, 6, 4]
+    - [0, 6, 12]  # keyframe
+    - [6, 12, 6]
+    - [6, 12, 7]
+    - [6, 12, 8]
+    - [6, 12, 9]
+    - [6, 12, 10]
+    - [0, 6, 12] # keyframe
+    - [6, 12, 12]
+    - [6, 12, 13]
+    - [6, 12, 14]
+  unet:
+    temp_attn_type: _s_ff_t_last  # tune-a-video
+    zero_module_type2: none
+    spatial_trainable: true

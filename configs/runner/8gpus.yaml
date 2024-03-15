@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - /runner/default
+
+runner:
+  checkpointing_steps: 5000
+  validation_steps: 2500
+  lr_scheduler: constant_with_warmup
+  enable_xformers_memory_efficient_attention: true

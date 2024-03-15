@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_cache
+
+dataset:
+  dataset_type: NuScenesTDataset
+  dataset_process_root: ../data/nuscenes_mmdet3d-t-keyframes/
+ 
+  data:
+    train:
+      video_length: ${model.video_length}
+    val:
+      video_length: ${model.video_length}
+    test:
+      video_length: ${model.video_length}

@@ -1,0 +1,3 @@
+gradient_accumulation_steps: 1
+mixed_precision: fp16
+report_to: tensorboard

@@ -11,6 +11,7 @@ cvt-outputs/*
 pretrained/*
 data/*
 
+!assets/*
 !perception/cross_view_transformers/splits/scene_gen.txt
 !.gitkeep
 

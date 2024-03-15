@@ -48,4 +48,4 @@ This may appear when you install bevfusion (mmdet3d) on cuda10.2. The latest ver
 
 ### Q4: video generation
 
-The authors do not have plan to integrate video generation with current codebase. For those who need code for video generation with research purposes, please send an email to `rygao@cse.cuhk.edu.hk` through your edu email and state your name & purpose.
+The authors do not have plan to integrate video generation with `main` branch codebase. For those who need code for video generation, please find this in `video` branch.

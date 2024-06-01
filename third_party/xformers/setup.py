@@ -49,9 +49,13 @@ def fetch_requirements():
 
 def get_local_version_suffix() -> str:
     date_suffix = datetime.datetime.now().strftime("%Y%m%d")
-    git_hash = subprocess.check_output(
-        ["git", "rev-parse", "--short", "HEAD"], cwd=Path(__file__).parent
-    ).decode("ascii")[:-1]
+    try:
+        git_hash = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], cwd=Path(__file__).parent
+        ).decode("ascii")[:-1]
+    except Exception as e:
+        git_hash = "920b707"
+        print(f"Cannot get local git hash, we just set it to {git_hash}.")
     return f"+{git_hash}.d{date_suffix}"
 
 
@@ -109,6 +113,11 @@ def get_flash_attention_extensions(cuda_version: int, extra_compile_args):
     if torch_version < (1, 12):
         print("You Pytorch version cannot load flash attention for xformers.")
         return []
+    else:
+        raise RuntimeError(
+            "In MagicDrive, we use pytorch 1.10.2, but your version is higher "
+            "than 1.12. If you know what you are doing, please delete this "
+            "error manually!")
     # Figure out default archs to target
     DEFAULT_ARCHS_LIST = ""
     if cuda_version > 1100:

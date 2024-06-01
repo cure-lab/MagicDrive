@@ -314,5 +314,8 @@ def run_one_batch(cfg, pipe, val_input, weight_dtype, global_generator=None,
                                  transparent_bg=transparent_bg)
                 for ti in range(len(images))
             ])
+    else:
+        for bi, images in enumerate(gen_imgs_list):
+            gen_imgs_wb_list.append(None)
 
     return map_imgs, ori_imgs, ori_imgs_with_box, gen_imgs_list, gen_imgs_wb_list

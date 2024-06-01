@@ -49,3 +49,27 @@ This may appear when you install bevfusion (mmdet3d) on cuda10.2. The latest ver
 ### Q4: video generation
 
 The authors do not have plan to integrate video generation with `main` branch codebase. For those who need code for video generation, please find this in `video` branch.
+
+
+### Q5: AttributeError: 'BasicTransformerBlock' object has no attribute '_args'
+
+[#7](https://github.com/cure-lab/MagicDrive/issues/7).
+This can occur when you install the official version of diffusers rather than from `third_party/diffusers`.
+To install the local version, please make sure you use the following commands:
+```bash
+# if you have install, remove first
+pip uninstall diffusers
+
+# install our version
+cd third_party/diffusers
+pip install -vvv .
+```
+
+
+### Q6: model loading path vs `accelerate` checkpoints
+[#25](https://github.com/cure-lab/MagicDrive/issues/25).
+There are two formats for model saving.
+- `checkpoints-xxxx`: saved by `accelerate`, default by `runner.checkpointing_steps: 5000`. This is used to resume training process.
+- `weight-Exx-Sxxxxx`: saved by `diffusers`, default is on the end of each epoch/model training. This is used to load for testing and evaluation.
+
+If you want to change the frequency for saving `diffusers` format for testing, please invoke [this line](https://github.com/cure-lab/MagicDrive/blob/0874565a8c3d35c7a3af0c3f78a7e664460e2e8b/magicdrive/runner/base_runner.py#L381C30-L381C41) manual in your code.

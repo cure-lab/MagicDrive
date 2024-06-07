@@ -13,6 +13,7 @@ defaults:
 task_id: 2.0t_0.4.3
 fps: 12
 runner:
+    bbox_drop_ratio: 0.4
     # validation_index: [204, 899, 1828, 3090] # total 4969
     validation_index: [1356, 5967, 12135, 20499] # should match above
     enable_unet_checkpointing: true
@@ -27,6 +28,7 @@ dataset:
   dataset_cache_file_tag: 26x200x200_12Hz_advanced
   dataset_cache_dirname: nuscenes_map_aux_12Hz_adv
   dataset_process_root: ../data/nuscenes_mmdet3d-12Hz/
+  start_on_keyframe: false
   data:
     train:
       ann_file: ${...dataset_process_root}nuscenes_advanced_12Hz_infos_train.pkl

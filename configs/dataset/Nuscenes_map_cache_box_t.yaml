@@ -8,11 +8,15 @@ defaults:
 dataset:
   dataset_type: NuScenesTDataset
   dataset_process_root: ../data/nuscenes_mmdet3d-t-keyframes/
+  start_on_keyframe: true
  
   data:
     train:
       video_length: ${model.video_length}
+      start_on_keyframe: ${dataset.start_on_keyframe}
     val:
       video_length: ${model.video_length}
+      start_on_keyframe: ${dataset.start_on_keyframe}
     test:
       video_length: ${model.video_length}
+      start_on_keyframe: ${dataset.start_on_keyframe}

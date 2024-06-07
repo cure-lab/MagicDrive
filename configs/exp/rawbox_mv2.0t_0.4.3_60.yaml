@@ -9,10 +9,12 @@ defaults:
 # the map from whole nuscenes map correctly. Therefore, we assume map is always
 # available to every frame.
 
-# based on 0.3.5, use all adv frames
-task_id: 2.0t_0.4.4
+# based on 0.3.5sp, use all adv frames
+task_id: 2.0t_0.4.3
 fps: 12
 runner:
+    bbox_drop_ratio: 0.4
+    keyframe_rate: 6
     # validation_index: [204, 899, 1828, 3090] # total 4969
     validation_index: [1356, 5967, 12135, 20499] # should match above
     enable_unet_checkpointing: true
@@ -36,24 +38,70 @@ dataset:
     test:
       ann_file: ${...dataset_process_root}nuscenes_advanced_12Hz_infos_val.pkl
 model:
-  video_length: 16
+  video_length: 61
   sc_attn_index:
-    - [0, 0, 6, 12]  # keyframe
+    - [0, 0, 6, 12]    # keyframe 
     - [0, 6, 0, 1]
     - [0, 6, 1, 2]
-    - [0, 6, 2, 3]
+    - [0, 6, 2, 3] 
     - [0, 6, 3, 4]
     - [0, 6, 4, 5]
-    - [0, 6, 6, 12]  # keyframe
+    - [0, 6, 6, 12]    # keyframe
     - [6, 12, 6, 7]
     - [6, 12, 7, 8]
     - [6, 12, 8, 9]
     - [6, 12, 9, 10]
     - [6, 12, 10, 11]
-    - [0, 6, 12, 12] # keyframe
-    - [6, 12, 12, 13]
-    - [6, 12, 13, 14]
-    - [6, 12, 14, 15]
+    - [6, 12, 12, 18]  # keyframe
+    - [12, 18, 12, 13] 
+    - [12, 18, 13, 14]
+    - [12, 18, 14, 15]
+    - [12, 18, 15, 16]
+    - [12, 18, 16, 17]
+    - [12, 18, 18, 24] # keyframe
+    - [18, 24, 18, 19]
+    - [18, 24, 19, 20]
+    - [18, 24, 20, 21]
+    - [18, 24, 21, 22]
+    - [18, 24, 22, 23]
+    - [18, 24, 24, 30] # keyframe
+    - [24, 30, 24, 25]
+    - [24, 30, 25, 26] 
+    - [24, 30, 26, 27]
+    - [24, 30, 27, 28]
+    - [24, 30, 28, 29]
+    - [24, 30, 30, 36] # keyframe
+    - [30, 36, 30, 31]
+    - [30, 36, 31, 32]
+    - [30, 36, 32, 33]
+    - [30, 36, 33, 34]
+    - [30, 36, 34, 35]
+    - [30, 36, 36, 42] # keyframe
+    - [36, 42, 36, 37]
+    - [36, 42, 37, 38]
+    - [36, 42, 38, 39] 
+    - [36, 42, 39, 40]
+    - [36, 42, 40, 41]
+    - [36, 42, 42, 48] # keyframe
+    - [42, 48, 42, 43]
+    - [42, 48, 43, 44] 
+    - [42, 48, 44, 45]
+    - [42, 48, 45, 46]
+    - [42, 48, 46, 47]
+    - [42, 48, 48, 54] # keyframe
+    - [48, 54, 48, 49]
+    - [48, 54, 49, 50]
+    - [48, 54, 50, 51]
+    - [48, 54, 51, 52]
+    - [48, 54, 52, 53]
+    - [48, 54, 54, 60] # keyframe
+    - [54, 60, 54, 55]
+    - [54, 60, 55, 56]
+    - [54, 60, 56, 57]
+    - [54, 60, 57, 58]
+    - [54, 60, 58, 59]
+    - [54, 60, 60, 60] # keyframe
   unet:
     temp_attn_type: _s_ff_t_last  # tune-a-video
     zero_module_type2: none
+    spatial_trainable: true

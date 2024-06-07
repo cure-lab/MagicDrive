@@ -24,15 +24,20 @@ class NuScenesTDataset(NuScenesDataset):
         use_valid_flag=False,
         force_all_boxes=False,
         video_length=None,
+        start_on_keyframe=True,
     ) -> None:
         self.video_length = video_length
+        self.start_on_keyframe = start_on_keyframe
         super().__init__(
             ann_file, pipeline, dataset_root, object_classes, map_classes,
             load_interval, with_velocity, modality, box_type_3d,
             filter_empty_gt, test_mode, eval_version, use_valid_flag,
             force_all_boxes)
+        if "12Hz" in ann_file and start_on_keyframe:
+            logging.warn("12Hz should use all starting frame to train, please"
+                         "double-check!")
 
-    def build_clips(self, data_infos, scene_tokens, start_on_keyframe=True):
+    def build_clips(self, data_infos, scene_tokens):
         """Since the order in self.data_infos may change on loading, we
         calculate the index for clips after loading.
 
@@ -49,7 +54,9 @@ class NuScenesTDataset(NuScenesDataset):
         all_clips = []
         for scene in scene_tokens:
             for start in range(len(scene) - self.video_length):
-                if start_on_keyframe and ";" in scene[start]:
+                if self.start_on_keyframe and ";" in scene[start]:
+                    continue  # this is not a keyframe
+                if self.start_on_keyframe and len(scene[start] >= 33):
                     continue  # this is not a keyframe
                 clip = [self.token_data_dict[token]
                         for token in scene[start: start + self.video_length]]

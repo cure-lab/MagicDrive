@@ -2,6 +2,10 @@
 
 **MagicDrive video generation**. We release this version mainly for reference. Please be prepared to solve any issue. Before getting start, it is **necessary** for users to setup and understand the code in `main` branch.
 
+## Pretrained MagicDrive-t
+
+- pretrianed weight for [rawbox_mv2.0t_0.4.3.yaml](configs/exp/rawbox_mv2.0t_0.4.3.yaml) on [OneDrive](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/Ec6fgCLRRflNo1cq7huz_vsBrJAhg4c9mdTLmsIEUMQXrg?e=iTyyf9).
+
 ## Environment Setup
 > The environment should be compatible with MagicDrive (single frame). However, this codebase rely on **another version of bevfusion** (in `third_party`) and some video related python packages.
 
@@ -172,7 +176,13 @@ scripts/dist_train.sh 8 runner=8gpus_t +exp=rawbox_mv2.0t_0.4.3
 scripts/dist_train.sh 8 runner=8gpus_t +exp=rawbox_mv2.0t_0.4.4
 ```
 
-**Typically, train ~80000 steps would be enough.**
+Run training for 224x400 with 61 frames with sweeps and generated annotations. (8xA800)
+
+```bash
+scripts/dist_train.sh 8 runner=8gpus_t +exp=rawbox_mv2.0t_0.4.3_60
+```
+
+**Typically, train ~80000 steps (or 4 epochs with 12Hz data) would be enough.**
 
 ## Video Generation
 

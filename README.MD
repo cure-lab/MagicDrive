@@ -17,8 +17,8 @@ Recent advancements in diffusion models have significantly enhanced the data syn
 
 ## News
 
-- [2024/06/07] MagicDrive can generate 60-frame videos! We release the config: [rawbox_mv2.0t_0.4.3_60.yaml](https://github.com/cure-lab/MagicDrive/blob/video/configs/exp/rawbox_mv2.0t_0.4.3_60.yaml). Check out our demos on the [project page](https://gaoruiyuan.com/magicdrive/#long-video).
-- [2024/06/07] We release pre-trained weight for 16-frame video generation. [Check it out](https://github.com/cure-lab/MagicDrive/tree/video?tab=readme-ov-file#pretrained-magicdrive-t)!
+- [2024/06/07] MagicDrive can generate **60-frame** videos! We release the config: [rawbox_mv2.0t_0.4.3_60.yaml](https://github.com/cure-lab/MagicDrive/blob/video/configs/exp/rawbox_mv2.0t_0.4.3_60.yaml). Check out our demos on the [project page](https://gaoruiyuan.com/magicdrive/#long-video).
+- [2024/06/07] We release **pre-trained weight** for **16-frame** video generation. [Check it out](https://github.com/cure-lab/MagicDrive/tree/video?tab=readme-ov-file#pretrained-magicdrive-t)!
 - [2024/06/01] We holds the [W-CODA](https://coda-dataset.github.io/w-coda2024/index.html) workshop @ECCV2024. Challenge [track 2](https://coda-dataset.github.io/w-coda2024/track2/) will use MagicDrive as the baseline. We will release more resournce in the near future. Stay tuned!
 
 ## Method

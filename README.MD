@@ -15,6 +15,12 @@ This repository contains the implementation of the paper
 
 Recent advancements in diffusion models have significantly enhanced the data synthesis with 2D control. Yet, precise 3D control in street view generation, crucial for 3D perception tasks, remains elusive. Specifically, utilizing Bird's-Eye View (BEV) as the primary condition often leads to challenges in geometry control (e.g., height), affecting the representation of object shapes, occlusion patterns, and road surface elevations, all of which are essential to perception data synthesis, especially for 3D object detection tasks. In this paper, we introduce MagicDrive, a novel street view generation framework, offering diverse 3D geometry controls including camera poses, road maps, and 3D bounding boxes, together with textual descriptions, achieved through tailored encoding strategies. Besides, our design incorporates a cross-view attention module, ensuring consistency across multiple camera views. With MagicDrive, we achieve high-fidelity street-view image & video synthesis that captures nuanced 3D geometry and various scene descriptions, enhancing tasks like BEV segmentation and 3D object detection.
 
+## News
+
+- [2024/06/07] MagicDrive can generate 60-frame videos! We release the config: [rawbox_mv2.0t_0.4.3_60.yaml](https://github.com/cure-lab/MagicDrive/blob/video/configs/exp/rawbox_mv2.0t_0.4.3_60.yaml). Check out our demos on the [project page](https://gaoruiyuan.com/magicdrive/#long-video).
+- [2024/06/07] We release pre-trained weight for 16-frame video generation. [Check it out](https://github.com/cure-lab/MagicDrive/tree/video?tab=readme-ov-file#pretrained-magicdrive-t)!
+- [2024/06/01] We holds the [W-CODA](https://coda-dataset.github.io/w-coda2024/index.html) workshop @ECCV2024. Challenge [track 2](https://coda-dataset.github.io/w-coda2024/track2/) will use MagicDrive as the baseline. We will release more resournce in the near future. Stay tuned!
+
 ## Method
 
 In MagicDrive, we employ two strategies (cross-attention and additive encoder branch) to inject text prompt, camera pose, object boxes, and road maps as conditions for generation. We also propose cross-view attention module for multiview consistency.

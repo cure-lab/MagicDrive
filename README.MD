@@ -2,6 +2,8 @@
 
 ✨ If you want **video generation**, please find the code at the [`video branch`](https://github.com/cure-lab/MagicDrive/tree/video).
 
+✨ Check out our new work [MagicDrive3D](https://github.com/flymin/MagicDrive3D) on **3D scene generation**!
+
 [![arXiv](https://img.shields.io/badge/ArXiv-2310.02601-b31b1b.svg?style=plastic)](https://arxiv.org/abs/2310.02601) [![web](https://img.shields.io/badge/Web-MagicDrive-blue.svg?style=plastic)](https://gaoruiyuan.com/magicdrive/) [![license](https://img.shields.io/github/license/cure-lab/MagicDrive?style=plastic)](https://github.com/cure-lab/MagicDrive/blob/main/LICENSE) [![star](https://img.shields.io/github/stars/cure-lab/MagicDrive)](https://github.com/cure-lab/MagicDrive)
 
 This repository contains the implementation of the paper 
@@ -224,3 +226,4 @@ We adopt the following open-sourced projects:
 - [bevfusion](https://github.com/mit-han-lab/bevfusion): dataloader to handle 3d bounding boxes and BEV map
 - [diffusers](https://github.com/huggingface/diffusers): framework to train stable diffusion
 - [xformers](https://github.com/facebookresearch/xformers): accelerator for attention mechanism
+- Thanks [@pixeli99](https://github.com/pixeli99) for training the [60-frame video generation](https://gaoruiyuan.com/magicdrive/#long-video).

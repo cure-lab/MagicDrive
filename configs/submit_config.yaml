@@ -1,0 +1,20 @@
+defaults:
+  - config
+  - _self_
+
+log_root_prefix: ../magicdrive-t-log/submission
+
+runner:
+  validation_batch_size: 1
+  validation_index: all
+
+resume_on_exists: false
+show_box: true
+cloud: false
+fps: 2
+
+fix_seed_for_every_generation: False
+
+post:
+  resize: ${dataset.back_resize}  # (h, w)
+  padding: ${dataset.back_pad}  # left, top, right and bottom

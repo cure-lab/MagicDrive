@@ -303,6 +303,8 @@ def run_one_batch(cfg, pipe, val_input, weight_dtype, global_generator=None,
         map_imgs.append(Image.fromarray(map_img_np))
 
     # ori
+    ori_imgs = [None for bi in range(bs)]
+    ori_imgs_with_box = [None for bi in range(bs)]
     if val_input["pixel_values"] is not None:
         ori_imgs = [
             [to_pil_image(img_m11_to_01(val_input["pixel_values"][bi][i]))
@@ -314,9 +316,6 @@ def run_one_batch(cfg, pipe, val_input, weight_dtype, global_generator=None,
                                  transparent_bg=transparent_bg)
                 for bi in range(bs)
             ]
-    else:
-        ori_imgs = [None for bi in range(bs)]
-        ori_imgs_with_box = [None for bi in range(bs)]
 
     # camera_emb = self._embed_camera(val_input["camera_param"])
     camera_param = val_input["camera_param"].to(weight_dtype)
@@ -328,13 +327,13 @@ def run_one_batch(cfg, pipe, val_input, weight_dtype, global_generator=None,
         global_generator=global_generator)
 
     # save gen with box
-    gen_imgs_wb_list = []
+    gen_imgs_wb_list = [None for _ in gen_imgs_list]
     if cfg.show_box:
         for bi, images in enumerate(gen_imgs_list):
-            gen_imgs_wb_list.append([
+            gen_imgs_wb_list[bi] = [
                 draw_box_on_imgs(cfg, bi, val_input, images[ti],
                                  transparent_bg=transparent_bg)
                 for ti in range(len(images))
-            ])
+            ]
 
     return map_imgs, ori_imgs, ori_imgs_with_box, gen_imgs_list, gen_imgs_wb_list

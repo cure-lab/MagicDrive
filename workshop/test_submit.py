@@ -14,6 +14,7 @@ from moviepy.editor import *
 import torch
 import torchvision
 from torchvision.transforms import InterpolationMode
+from accelerate import Accelerator
 
 # fmt: off
 # bypass annoying warning
@@ -25,7 +26,7 @@ warnings.filterwarnings("ignore", category=ShapelyDeprecationWarning)
 sys.path.append(".")  # noqa
 from magicdrive.runner.utils import concat_6_views, img_concat_h, img_concat_v
 from magicdrive.misc.test_utils import (
-    prepare_all, run_one_batch, insert_pipeline_item
+    prepare_all, run_one_batch, update_progress_bar_config,
 )
 
 
@@ -63,8 +64,17 @@ def main(cfg: DictConfig):
     logging.info(f"Your validation index: {cfg.runner.validation_index}")
 
     #### setup everything ####
-    pipe, val_dataloader, weight_dtype = prepare_all(cfg)
-    OmegaConf.save(config=cfg, f=os.path.join(cfg.log_root, "run_config.yaml"))
+    accelerator = Accelerator(
+        mixed_precision=cfg.accelerator.mixed_precision,
+        project_dir=HydraConfig.get().runtime.output_dir,
+    )
+    pipe, val_dataloader, weight_dtype = prepare_all(
+        cfg, device=accelerator.device)
+    if accelerator.is_main_process:
+        OmegaConf.save(
+            config=cfg, f=os.path.join(cfg.log_root, "run_config.yaml"))
+    val_dataloader = accelerator.prepare(val_dataloader)
+    pipe.to(accelerator.device)
 
     # For submission, post transformation
     post_trans = []
@@ -82,16 +92,27 @@ def main(cfg: DictConfig):
     post_trans = torchvision.transforms.Compose(post_trans)
     logging.info(f"Using post process: {post_trans}")
 
+    frames_root = os.path.join(cfg.log_root, "frames")
+    frames_tmp_root = os.path.join(cfg.log_root, "frames_tmp")
+    visualize_root = os.path.join(cfg.log_root, "video_visualization")
+    if accelerator.is_main_process:
+        os.makedirs(frames_root)
+        os.makedirs(frames_tmp_root)
+        os.makedirs(visualize_root)
+
     #### start ####
     batch_index = 0
     progress_bar = tqdm(
         range(len(val_dataloader) * cfg.runner.validation_times),
-        desc="Steps",
-    )
+        desc="Steps", ncols=80, disable=not accelerator.is_main_process)
+    update_progress_bar_config(
+        pipe, ncols=80, disable=not accelerator.is_main_process or cfg.cloud)
+
     for val_input in val_dataloader:
         batch_index += 1
-        batch_img_index = 0
         gen_img_paths = {}
+
+        accelerator.wait_for_everyone()
         return_tuples = run_one_batch(cfg, pipe, val_input, weight_dtype)
 
         this_token = val_input['meta_data']['metas'][0].data['token']
@@ -105,7 +126,7 @@ def main(cfg: DictConfig):
                 # generation
                 for view, gen_img in zip(cfg.dataset.view_order, gen_imgs):
                     save_path = os.path.join(
-                        cfg.log_root, "frames", f"{this_token}_gen{ti}",
+                        frames_root, f"{this_token}_gen{ti}",
                         f"{this_token}_{view}_{frame_idx}.png")
                     os.makedirs(os.path.dirname(save_path), exist_ok=True)
                     gen_img.save(save_path)
@@ -113,7 +134,7 @@ def main(cfg: DictConfig):
                 # start: save for visualization, can be turned off
                 view_img_all = output_func(gen_imgs)
                 save_path = os.path.join(
-                    cfg.log_root, "frames_tmp", f"{this_token}_gen{ti}",
+                    frames_tmp_root, f"{this_token}_gen{ti}",
                     f"{this_token}_{frame_idx}.png")
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 view_img_all.save(save_path)
@@ -126,18 +147,19 @@ def main(cfg: DictConfig):
             frame_idx += 1
 
         # start: for visualization, can be turned off
-        visualize_root = os.path.join(cfg.log_root, "video_visualization")
         os.makedirs(visualize_root, exist_ok=True)
         for k, v in gen_img_paths.items():
             make_video_with_filenames(
                 v, os.path.join(
                     visualize_root,
-                    f"{batch_index}_{batch_img_index}_gen{k}.mp4"),
+                    f"{this_token}_gen{k}.mp4"),
                 fps=cfg.fps)
         # end: for visualization, can be turned off
 
         # update bar
         progress_bar.update(cfg.runner.validation_times)
+
+    accelerator.wait_for_everyone()
 
 
 if __name__ == "__main__":

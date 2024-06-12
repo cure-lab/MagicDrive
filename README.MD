@@ -107,7 +107,12 @@ python demo/interactive_gui.py
 # a gradio-based gui, use your web browser
 ```
 
+As suggested by [#37](https://github.com/cure-lab/MagicDrive/issues/37), prompt is configurable through GUI!
+
+![gui](assets/gui.jpg)
+
 Run our demo for camera view generation.
+
 ```bash
 cd ${ROOT}
 python demo/run.py resume_from_checkpoint=magicdrive-log/SDv1.5mv-rawbox_2023-09-07_18-39_224x400

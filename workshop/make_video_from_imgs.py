@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 from PIL import Image
 from moviepy.editor import ImageSequenceClip
+import concurrent.futures
 logging.captureWarnings(False)
 import fire
 
@@ -35,6 +36,25 @@ def load_pathList(root, prefix, img_num, ext=".png"):
     for i in range(img_num):
         paths.append(os.path.join(root, prefix + f"_{i}" + ext))
     return paths
+
+
+def process_token(token, subfix, root, outroot, view_order, img_num, bitrate, quiet):
+    for sub in subfix:
+        outdir = os.path.join(outroot, token + sub)
+        print(f"Your video will be saved in {outdir}")
+        try:
+            os.makedirs(outdir)
+        except FileExistsError as e:
+            print(f"{outdir} exists, please assign another or delete it.")
+            raise (e)
+        for view in view_order:
+            sub_root = os.path.join(root, f"{token}{sub}")
+            prefix = f"{token}_{view}"
+            outpath = os.path.join(outdir, prefix + ".mp4")
+            pathList = load_pathList(sub_root, prefix, img_num)
+            make_video_with_pathList(
+                pathList, outpath, bitrate, verbose=not quiet)
+            print(f"Your video saved to: {outpath}")  
 
 
 def make_video(
@@ -92,24 +112,17 @@ def make_video(
         tokens = [s[0] for s in data_infos['scene_tokens']]
     else:
         tokens = [token]
-
-    for token in tokens:
-        for sub in subfix:
-            outdir = os.path.join(outroot, token + sub)
-            print(f"Your video will be saved in {outdir}")
+    
+    with concurrent.futures.ProcessPoolExecutor(max_workers=64) as executor:
+        futures = [
+            executor.submit(process_token, token, subfix, root, outroot, view_order, img_num, bitrate, quiet)
+            for token in tokens
+        ]
+        for future in concurrent.futures.as_completed(futures):
             try:
-                os.makedirs(outdir)
-            except FileExistsError as e:
-                print(f"{outdir} exists, please assign another or delete it.")
-                raise (e)
-            for view in view_order:
-                sub_root = os.path.join(root, f"{token}{sub}")
-                prefix = f"{token}_{view}"
-                outpath = os.path.join(outdir, prefix + ".mp4")
-                pathList = load_pathList(sub_root, prefix, img_num)
-                make_video_with_pathList(
-                    pathList, outpath, bitrate, verbose=not quiet)
-                print(f"Your video saved to: {outpath}")
+                future.result()
+            except Exception as exc:
+                print(f'Generated an exception: {exc}')
 
 
 if __name__ == "__main__":

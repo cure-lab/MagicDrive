@@ -60,7 +60,8 @@ def load_model_from(
     return cfg, pipe
 
 
-def run_pipe(cfg, pipe, data, seed=None, step=None, scale=None):
+def run_pipe(cfg, pipe, data, seed=None, prompt="", neg_prompt=None, step=None,
+             scale=None):
     assert cfg.model.bbox_mode == "all-xyz"
     assert cfg.model.bbox_view_shared == False
     collate_fn_param = {
@@ -80,8 +81,15 @@ def run_pipe(cfg, pipe, data, seed=None, step=None, scale=None):
         pipeline_param["num_inference_steps"] = step
     if scale is not None:
         pipeline_param["guidance_scale"] = scale
+    if prompt == "":
+        prompt = val_input['captions'],
+    else:
+        prompt = [prompt]
+    if neg_prompt is not None:
+        neg_prompt = [neg_prompt]
     image = pipe(
-        prompt=val_input['captions'],
+        prompt=prompt,
+        negative_prompt=neg_prompt,
         image=val_input['bev_map_with_aux'],
         camera_param=camera_param,
         height=cfg.dataset.image_size[0],
@@ -199,8 +207,10 @@ if __name__ == "__main__":
                 gr.Markdown("**Generation Options**")
                 with gr.Group():
                     seed = gr.Number(42, label="Seed", step=1)
+                    prompt = gr.Textbox("", label="Prompt")
                     with gr.Accordion("More Options:", open=False):
                         step = gr.Number(20, label="Step", minimum=5, maximum=1000, step=1)
+                        neg_prompt = gr.Textbox("", label="Negative Prompt")
                         scale = gr.Number(2.0, label="Guidance Scale", minimum=0, maximum=10, step=0.5)
 
             with gr.Column(): # right column
@@ -233,17 +243,18 @@ if __name__ == "__main__":
         # on load data
         @data_id.input(inputs=[data_id, load_gt_image], outputs=[
             box_id, x_offset, y_offset, z_offset, yaw_offset, box_id, box_viz,
-            box_sel_viz])
+            box_sel_viz, prompt])
         def load_data(data_id, with_bg):
             global current_data
             current_data = torch.load(f"demo/data/{data_id}.pth")
             # add `camera2lidar` and `lidar2image` from `lidar2camera`
+            ori_prompt = cfg.dataset.template.format(**current_data["metas"])
             current_data = precompute_cam_ext(current_data)
             editing_data.clear()
             rendered_annotation = show_annotations(with_bg)
             return gr.Dropdown(list(range(len(current_data['gt_bboxes_3d']))),
                                type="index", label="Select BBox",
-                               interactive=True), 0, 0, 0, 0, None, rendered_annotation, None
+                               interactive=True), 0, 0, 0, 0, None, rendered_annotation, None, ori_prompt
 
         # show selected box for editing
         @box_id.input(inputs=[box_id, load_gt_image], outputs=[
@@ -292,22 +303,24 @@ if __name__ == "__main__":
         yaw_offset.change(edit_and_show, **share_kwargs)
 
         # run the model
-        @run_btn.click(inputs=[seed, step, scale, load_gt_image],
-                       outputs=[box_viz, box_sel_viz])
-        def run_pipe(seed_g, step_g, scale_g, with_bg):
+        @run_btn.click(inputs=[
+            seed, prompt, neg_prompt, step, scale, load_gt_image],
+            outputs=[box_viz, box_sel_viz])
+        def run_pipe(seed_g, prompt_g, neg_prompt_g, step_g, scale_g, with_bg):
             edited_data = apply_editing()
             if edited_data is None:
                 return None, None
             box_img = show_annotations(with_bg)
             generated_img = runner(
-                data=edited_data, seed=seed_g, step=step_g, scale=scale_g)
+                data=edited_data, seed=seed_g, prompt=prompt_g,
+                neg_prompt=neg_prompt_g, step=step_g, scale=scale_g)
             return box_img, generated_img
 
         # reset the whole GUI.
         @rst_btn.click(outputs=[
             data_id, box_id, x_offset, y_offset, z_offset, l_offset, w_offset,
-            h_offset, yaw_offset, box_viz, box_sel_viz])
+            h_offset, yaw_offset, box_viz, box_sel_viz, prompt])
         def reset_all():
-            return None, None, 0, 0, 0, 0, 0, 0, 0, None, None
+            return None, None, 0, 0, 0, 0, 0, 0, 0, None, None, None
 
     demo.launch(server_name="0.0.0.0", server_port=7860)

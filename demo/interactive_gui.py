@@ -210,8 +210,9 @@ if __name__ == "__main__":
                     prompt = gr.Textbox("", label="Prompt")
                     with gr.Accordion("More Options:", open=False):
                         step = gr.Number(20, label="Step", minimum=5, maximum=1000, step=1)
-                        neg_prompt = gr.Textbox("", label="Negative Prompt")
                         scale = gr.Number(2.0, label="Guidance Scale", minimum=0, maximum=10, step=0.5)
+                        neg_prompt = gr.Textbox("", label="Negative Prompt")
+                        gr.Markdown("WARNING: negative prompts are not tested! see [#42](https://github.com/cure-lab/MagicDrive/issues/42).")
 
             with gr.Column(): # right column
                 with gr.Group():

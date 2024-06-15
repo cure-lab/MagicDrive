@@ -8,11 +8,27 @@ import torch.nn.functional as F
 import torch.utils.checkpoint
 from einops import rearrange
 
-from diffusers.models.attention_processor import Attention, AttnProcessor
+from diffusers.models.attention_processor import (
+    Attention,
+    AttnProcessor,
+    XFormersAttnProcessor,
+    XFormersAttnAddedKVProcessor,
+    CustomDiffusionXFormersAttnProcessor,
+    LoRAXFormersAttnProcessor,
+)
 from diffusers.models.attention import (
     BasicTransformerBlock, AdaLayerNorm, AdaLayerNormZero
 )
 from diffusers.models.controlnet import zero_module
+
+
+def is_xformers(module):
+    return isinstance(module.processor, (
+        XFormersAttnProcessor,
+        XFormersAttnAddedKVProcessor,
+        CustomDiffusionXFormersAttnProcessor,
+        LoRAXFormersAttnProcessor,
+    ))
 
 
 def _ensure_kv_is_int(view_pair: dict):
@@ -212,11 +228,26 @@ class BasicMultiviewTransformerBlock(BasicTransformerBlock):
         hidden_states_in1, hidden_states_in2, cam_order = self._construct_attn_input(
             norm_hidden_states, )
         # attention
-        attn_raw_output = self.attn4(
-            hidden_states_in1,
-            encoder_hidden_states=hidden_states_in2,
-            **cross_attention_kwargs,
-        )
+        bs1, dim1 = hidden_states_in1.shape[:2]
+        grpn = 6  # TODO: hard-coded to use bs=6, avoiding numerical error.
+        if bs1 > grpn and dim1 > 1400 and not is_xformers(self.attn4):
+            hidden_states_in1s = torch.split(hidden_states_in1, grpn)
+            hidden_states_in2s = torch.split(hidden_states_in2, grpn)
+            grps = len(hidden_states_in1s)
+            attn_raw_output = [None for _ in range(grps)]
+            for i in range(grps):
+                attn_raw_output[i] = self.attn4(
+                    hidden_states_in1s[i],
+                    encoder_hidden_states=hidden_states_in2s[i],
+                    **cross_attention_kwargs,
+                )
+            attn_raw_output = torch.cat(attn_raw_output, dim=0)
+        else:
+            attn_raw_output = self.attn4(
+                hidden_states_in1,
+                encoder_hidden_states=hidden_states_in2,
+                **cross_attention_kwargs,
+            )
         # final output
         if self.neighboring_attn_type == "self":
             attn_output = rearrange(
@@ -838,10 +869,25 @@ class TemporalMultiviewTransformerBlock(BasicTemporalTransformerBlock):
             norm_hidden_states_q, norm_hidden_states_kv, back_order = self._construct_sc_attn_input(
                 norm_hidden_states, self.sc_attn_index, type="concat")
 
-            attn_raw_output = self.attn1(
-                norm_hidden_states_q,
-                encoder_hidden_states=norm_hidden_states_kv,
-                attention_mask=attention_mask, **cross_attention_kwargs)
+            if norm_hidden_states_kv.shape[1] > 2800:
+                # TODO: HARD CODED! we chunk on long seq. limitation unknown.
+                norm_hidden_states_q = norm_hidden_states_q.chunk(2)
+                norm_hidden_states_kv = norm_hidden_states_kv.chunk(2)
+                attn_raw_outputs = [None, None]
+                attn_raw_outputs[0] = self.attn1(
+                    norm_hidden_states_q[0],
+                    encoder_hidden_states=norm_hidden_states_kv[0],
+                    attention_mask=attention_mask, **cross_attention_kwargs)
+                attn_raw_outputs[1] = self.attn1(
+                    norm_hidden_states_q[1],
+                    encoder_hidden_states=norm_hidden_states_kv[1],
+                    attention_mask=attention_mask, **cross_attention_kwargs)
+                attn_raw_output = torch.cat(attn_raw_outputs, dim=0)
+            else:
+                attn_raw_output = self.attn1(
+                    norm_hidden_states_q,
+                    encoder_hidden_states=norm_hidden_states_kv,
+                    attention_mask=attention_mask, **cross_attention_kwargs)
             attn_output = torch.zeros_like(norm_hidden_states)
             for frame_i in range(self.video_length):
                 # TODO: any problem here? n should == 1
@@ -888,11 +934,26 @@ class TemporalMultiviewTransformerBlock(BasicTemporalTransformerBlock):
         hidden_states_in1, hidden_states_in2, cam_order = self._construct_attn_input(
             norm_hidden_states, )
         # attention
-        attn_raw_output = self.attn4(
-            hidden_states_in1,
-            encoder_hidden_states=hidden_states_in2,
-            **cross_attention_kwargs,
-        )
+        bs1, dim1 = hidden_states_in1.shape[:2]
+        grpn = 6  # TODO: hard-coded to use bs=6, avoiding numerical error.
+        if bs1 > grpn and dim1 > 1400 and not is_xformers(self.attn4):
+            hidden_states_in1s = torch.split(hidden_states_in1, grpn)
+            hidden_states_in2s = torch.split(hidden_states_in2, grpn)
+            grps = len(hidden_states_in1s)
+            attn_raw_output = [None for _ in range(grps)]
+            for i in range(grps):
+                attn_raw_output[i] = self.attn4(
+                    hidden_states_in1s[i],
+                    encoder_hidden_states=hidden_states_in2s[i],
+                    **cross_attention_kwargs,
+                )
+            attn_raw_output = torch.cat(attn_raw_output, dim=0)
+        else:
+            attn_raw_output = self.attn4(
+                hidden_states_in1,
+                encoder_hidden_states=hidden_states_in2,
+                **cross_attention_kwargs,
+            )
         # final output
         if self.neighboring_attn_type == "self":
             attn_output = rearrange(

@@ -134,7 +134,12 @@ We prepare the nuScenes dataset similar to [bevfusion's instructions](https://gi
     ├── v1.0-mini
     └── v1.0-trainval
     ```
+
+> [!TIP]
+> You can download the `.pkl` files from [OneDrive](https://mycuhk-my.sharepoint.com/personal/1155157018_link_cuhk_edu_hk/_layouts/15/onedrive.aspx?id=%2Fpersonal%2F1155157018%5Flink%5Fcuhk%5Fedu%5Fhk%2FDocuments%2FMagicDrive%2Fgithub%5Frelease%2Fnuscenes%5Fmmdet3d%5F2%2Etar%2Egz&parent=%2Fpersonal%2F1155157018%5Flink%5Fcuhk%5Fedu%5Fhk%2FDocuments%2FMagicDrive%2Fgithub%5Frelease&ga=1). They should be enough for training and testing.
+
 2. Generate mmdet3d annotation files by:
+
     ```bash
     python tools/create_data.py nuscenes --root-path ./data/nuscenes \
       --out-dir ./data/nuscenes_mmdet3d_2 --extra-tag nuscenes

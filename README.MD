@@ -73,7 +73,12 @@ ${ROOT}/../data/
 └── nuscenes_mmdet3d
 ```
 
-Generation `ann_file` for video frames (with keyframes / sweeps). We use them to train 7~16-frame video model.
+> [!NOTE]  
+> In our latest version/model, we only adopt **Option2**. It is safe to skip **Option1**.
+>
+> We have released all the pre-generated annotations, please find them at [W-CODA2024 Track2](https://coda-dataset.github.io/w-coda2024/track2/#data_table).
+
+**(Option1)** Generation `ann_file` for video frames (with keyframes / sweeps). We use them to train 7~16-frame video model.
 
 ```bash
 # create `nuscenes_mmdet3d-t-keyframes`
@@ -105,7 +110,7 @@ ${ROOT}/../data/
     └── nuscenes_infos_val.pkl
 ```
 
-Generation annotations for sweep frames and `ann_file` for MagicDrive. We will use them to train 16-frame video models, and video generation for all 13~16 frame models.
+**(Option2)** Generation annotations for sweep frames and `ann_file` for MagicDrive. We will use them to train 16-frame video models, and video generation for all 13~16 frame models.
 
 1. Please follow [ASAP](https://github.com/JeffWang987/ASAP/blob/main/docs/prepare_data.md) to generate `interp` annotations for nuScenes. Simply, the following command should do the work:
 	```bash

@@ -23,6 +23,7 @@ from .common import (
 try:
     from ... import _C_flashattention  # type: ignore[attr-defined]
 
+    raise ImportError
     # create library so that flash-attn goes through the PyTorch Dispatcher
     _flash_lib = torch.library.Library("xformers_flash", "DEF")
 

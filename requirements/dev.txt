@@ -25,5 +25,3 @@ ninja
 
 # (optional)
 # xformers  # from third-party
-# triton  # >2.0.0post1, 2.0.0post1 is buggy, any later version should fix
-# deepspeed  # >=0.9.5+1491e14e, 0.9.5 cannot work

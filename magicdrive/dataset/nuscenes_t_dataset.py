@@ -25,9 +25,11 @@ class NuScenesTDataset(NuScenesDataset):
         force_all_boxes=False,
         video_length=None,
         start_on_keyframe=True,
+        start_on_firstframe=False,
     ) -> None:
         self.video_length = video_length
         self.start_on_keyframe = start_on_keyframe
+        self.start_on_firstframe = start_on_firstframe
         super().__init__(
             ann_file, pipeline, dataset_root, object_classes, map_classes,
             load_interval, with_velocity, modality, box_type_3d,
@@ -61,6 +63,8 @@ class NuScenesTDataset(NuScenesDataset):
                 clip = [self.token_data_dict[token]
                         for token in scene[start: start + self.video_length]]
                 all_clips.append(clip)
+                if self.start_on_firstframe:
+                    break
         logging.info(f"[{self.__class__.__name__}] Got {len(scene_tokens)} "
                      f"continuous scenes. Cut into {self.video_length}-clip, "
                      f"which has {len(all_clips)} in total.")

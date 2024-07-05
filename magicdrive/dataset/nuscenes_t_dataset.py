@@ -56,7 +56,7 @@ class NuScenesTDataset(NuScenesDataset):
             for start in range(len(scene) - self.video_length + 1):
                 if self.start_on_keyframe and ";" in scene[start]:
                     continue  # this is not a keyframe
-                if self.start_on_keyframe and len(scene[start] >= 33):
+                if self.start_on_keyframe and len(scene[start]) >= 33:
                     continue  # this is not a keyframe
                 clip = [self.token_data_dict[token]
                         for token in scene[start: start + self.video_length]]

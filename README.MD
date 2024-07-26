@@ -22,7 +22,7 @@ This repository contains the implementation of the paper
 ## Abstract
 
 <details>
-<summary><b>TL;DR</b> MagicDrive generates high-quality street-view images & videos with diverse 3D geometry control and multiview consistency, which can be used as a data engine in various perception tasks.</summary>
+<summary><b>TL; DR</b> MagicDrive generates high-quality street-view images & videos with diverse 3D geometry control and multiview consistency, which can be used as a data engine in various perception tasks.</summary>
 
 Recent advancements in diffusion models have significantly enhanced the data synthesis with 2D control. Yet, precise 3D control in street view generation, crucial for 3D perception tasks, remains elusive. Specifically, utilizing Bird's-Eye View (BEV) as the primary condition often leads to challenges in geometry control (e.g., height), affecting the representation of object shapes, occlusion patterns, and road surface elevations, all of which are essential to perception data synthesis, especially for 3D object detection tasks. In this paper, we introduce MagicDrive, a novel street view generation framework, offering diverse 3D geometry controls including camera poses, road maps, and 3D bounding boxes, together with textual descriptions, achieved through tailored encoding strategies. Besides, our design incorporates a cross-view attention module, ensuring consistency across multiple camera views. With MagicDrive, we achieve high-fidelity street-view image & video synthesis that captures nuanced 3D geometry and various scene descriptions, enhancing tasks like BEV segmentation and 3D object detection.
 
@@ -36,7 +36,7 @@ Recent advancements in diffusion models have significantly enhanced the data syn
 
 ## Method
 
-In MagicDrive, we employ two strategies (cross-attention and additive encoder branch) to inject text prompt, camera pose, object boxes, and road maps as conditions for generation. We also propose cross-view attention module for multiview consistency.
+In MagicDrive, we employ two strategies (cross-attention and additive encoder branch) to inject text prompts, camera poses, object boxes, and road maps as conditions for generation. We also propose a cross-view attention module for multiview consistency.
 
 ![image-20231011165634648](./assets/overview.png)
 
@@ -186,7 +186,7 @@ accelerate launch --mixed_precision fp16 --gpu_ids all --num_processes 8 tools/t
 ```
 During training, you can check tensorboard for the log and intermediate results.
 
-Besides, we provides debug config to test your environment and data loading process (with 2xV100):
+Besides, we provide debug config to test your environment and data loading process (with 2xV100):
 ```bash
 accelerate launch --mixed_precision fp16 --gpu_ids all --num_processes 2 tools/train.py \
   +exp=224x400 runner=debug runner.validation_before_run=true
@@ -208,12 +208,12 @@ First, you should generate the full validation set with
 python perception/data_prepare/val_set_gen.py \
   resume_from_checkpoint=./pretrained/SDv1.5mv-rawbox_2023-09-07_18-39_224x400 \
   task_id=224x400 fid.img_gen_dir=./tmp/224x400 +fid=data_gen +exp=224x400
-  # for map=zero as uncondition for CFG, add `runner.pipeline_param.use_zero_map_as_unconditional=true`
+  # for map=zero as the null condition for CFG, add `runner.pipeline_param.use_zero_map_as_unconditional=true`
 ```
 
 Then, test the FID score with
 ```bash
-# we assume your torch cache dir is at "../pretrained/torch_cache/". if you want
+# we assume your torch cache dir is at "../pretrained/torch_cache/". If you want
 # to use the default place, please comment the second last line in "tools/fid_score.py".
 python tools/fid_score.py cfg \
   resume_from_checkpoint=./pretrained/SDv1.5mv-rawbox_2023-09-07_18-39_224x400 \

@@ -1,0 +1,17 @@
+# @package _global_
+defaults:
+  - _self_  # make sure override
+
+fid:
+  resize: ${dataset.back_resize}  # (h, w)
+  padding: ${dataset.back_pad}  # left, top, right and bottom
+  raw_output: false
+  # path relative to `${ROOT}`
+  img_gen_dir: ???
+
+runner:
+  validation_index: all
+  validation_times: 1
+
+log_root_prefix: ../magicdrive-log/fid_gen
+show_box: false

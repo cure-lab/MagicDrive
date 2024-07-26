@@ -1,0 +1,6 @@
+defaults:
+  - config
+  - fid: default
+  - _self_
+
+log_root_prefix: ../magicdrive-log/fid

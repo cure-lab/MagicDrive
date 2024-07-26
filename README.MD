@@ -210,6 +210,7 @@ python perception/data_prepare/val_set_gen.py \
   task_id=224x400 fid.img_gen_dir=./tmp/224x400 +fid=data_gen +exp=224x400
   # for map=zero as the null condition for CFG, add `runner.pipeline_param.use_zero_map_as_unconditional=true`
 ```
+For this script, **multi-process / multi-node** is also available by `accelerate`. Just launch it with commands similar to that of training.
 
 Then, test the FID score with
 ```bash

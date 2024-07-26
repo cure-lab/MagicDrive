@@ -215,7 +215,7 @@ python tools/fid_score.py cfg \
   fid.rootb=tmp/224x400
 ```
 
-Alternatively, we provide the pre-generated samples for validation set [here]().
+Alternatively, we provide the pre-generated samples for validation set [here](https://mycuhk-my.sharepoint.com/:f:/g/personal/1155157018_link_cuhk_edu_hk/EjWsTYfC01BAl0F2NLP_bX4BqHjY-oV1VaTx4RgMzbiXWQ?e=fPfEy3).
 You can put them in `./tmp` and launch the test through
 ```bash
 python tools/fid_score.py cfg \

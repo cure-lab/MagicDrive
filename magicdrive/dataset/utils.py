@@ -465,8 +465,13 @@ def collate_fn(
     if bbox_maxlen != 0:
         for ret_dict in ret_dicts:
             bboxes_3d_data = ret_dict['kwargs']['bboxes_3d_data']
-            # if it is None while others not, we replace it will all padding.
-            bboxes_3d_data = {} if bboxes_3d_data is None else bboxes_3d_data
+            # if it is None while others not, we replace it with all padding.
+            # NOTE: keep cam_params as in `collate_fn_single`! although it is
+            # useless. 
+            if bboxes_3d_data is None:
+                bboxes_3d_data = ret_dict['kwargs']['bboxes_3d_data'] = {
+                    "cam_params": ret_dict['camera_param'],
+                }
             new_data = pad_bboxes_to_maxlen(
                 bb_shape, bbox_maxlen, **bboxes_3d_data)
             ret_dict['kwargs']['bboxes_3d_data'].update(new_data)

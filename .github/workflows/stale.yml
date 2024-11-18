@@ -10,6 +10,7 @@ on:
   - cron: '34 16 * * *'
   workflow_dispatch:
 
+
 jobs:
   stale:
 
@@ -17,6 +18,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
+      actions: write
 
     steps:
     - uses: actions/stale@v9

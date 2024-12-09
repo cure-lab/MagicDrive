@@ -110,9 +110,11 @@ Our training is based on [stable-diffusion-v1-5](https://huggingface.co/runwayml
 ## Street-view Generation with MagicDrive
 
 Download our model checkpoint for MagicDrive from 
+
 - 224x400 model: [onedrive](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/ERiu-lbAvq5IkODTscFXYPUBpVYVDbwjHchDExBlPfeQ0w?e=8YaDM0)
 - 272x736 model: [huggingface](https://huggingface.co/flymin/MagicDrive-272x736-400ep)
 - 424x800 model: [huggingface](https://huggingface.co/flymin/MagicDrive-424x800-450ep)
+
 and put them in `${ROOT}/pretrained/`
 
 **Run our demo**

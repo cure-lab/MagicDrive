@@ -2,9 +2,10 @@
 
 **MagicDrive video generation**. We release this version mainly for reference. Please be prepared to solve any issue. Before getting start, it is **necessary** for users to setup and understand the code in `main` branch.
 
-## Pretrained MagicDrive-t
+## MagicDrive-t Checkpoints
 
-- pretrianed weight for [rawbox_mv2.0t_0.4.3.yaml](configs/exp/rawbox_mv2.0t_0.4.3.yaml) on [OneDrive](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/Ec6fgCLRRflNo1cq7huz_vsBrJAhg4c9mdTLmsIEUMQXrg?e=iTyyf9).
+- Model checkpoint for [rawbox_mv2.0t_0.4.3.yaml](configs/exp/rawbox_mv2.0t_0.4.3.yaml) on [OneDrive](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/Ec6fgCLRRflNo1cq7huz_vsBrJAhg4c9mdTLmsIEUMQXrg?e=iTyyf9).
+- Model checkpoint for [rawbox_mv2.0t_0.4.3_60.yaml](configs/exp/rawbox_mv2.0t_0.4.3_60.yaml) (i.e., 60 frame model) on [huggingface](https://huggingface.co/flymin/MagicDrive-t-60f-224x400-80k)
 
 ## Environment Setup
 > The environment should be compatible with MagicDrive (single frame). However, this codebase rely on **another version of bevfusion** (in `third_party`) and some video related python packages.
@@ -56,6 +57,8 @@ Pretrained weight of **MagicDrive** (image generation)
 {ROOT}/../MagicDrive-pretrained/
 └── SDv1.5mv-rawbox_2023-09-07_18-39_224x400
 ```
+
+Our models will load this image generation model before training for video generation.
 
 ## Datasets
 

@@ -30,9 +30,10 @@ Recent advancements in diffusion models have significantly enhanced the data syn
 
 ## News
 
+- [2024/12/09] We release 60-frame video generation model on [huggingface](https://huggingface.co/flymin/MagicDrive-t-60f-224x400-80k), please use the code in `video` branch to run.
 - [2024/12/09] We release two higher-resolution image generation models ([424x800 model](https://huggingface.co/flymin/MagicDrive-424x800-450ep) for visualization and [272x736 model](https://huggingface.co/flymin/MagicDrive-272x736-400ep) for BEVFusion) with their training configs.
 - [2024/06/07] MagicDrive can generate **60-frame** videos! We release the config: [rawbox_mv2.0t_0.4.3_60.yaml](https://github.com/cure-lab/MagicDrive/blob/video/configs/exp/rawbox_mv2.0t_0.4.3_60.yaml). Check out our demos on the [project page](https://gaoruiyuan.com/magicdrive/#long-video).
-- [2024/06/07] We release **pre-trained weight** for **16-frame** video generation. [Check it out](https://github.com/cure-lab/MagicDrive/tree/video?tab=readme-ov-file#pretrained-magicdrive-t)!
+- [2024/06/07] We release **model checkpoint** for **16-frame** video generation. [Check it out](https://github.com/cure-lab/MagicDrive/tree/video?tab=readme-ov-file#magicdrive-t-checkpoints)!
 - [2024/06/01] We hold the [W-CODA](https://coda-dataset.github.io/w-coda2024/index.html) workshop @ECCV2024. Challenge [track 2](https://coda-dataset.github.io/w-coda2024/track2/) will use MagicDrive as the baseline. We will release more resources in the near future. Stay tuned!
 
 ## Method
@@ -43,12 +44,12 @@ In MagicDrive, we employ two strategies (cross-attention and additive encoder br
 
 ## TODO
 
-- [x] [config](configs/exp/224x400.yaml) and [pretrained weight](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/ERiu-lbAvq5IkODTscFXYPUBpVYVDbwjHchDExBlPfeQ0w?e=8YaDM0) for base resolution (224x400)
+- [x] [config](configs/exp/224x400.yaml) and [model checkpoint](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/ERiu-lbAvq5IkODTscFXYPUBpVYVDbwjHchDExBlPfeQ0w?e=8YaDM0) for base resolution (224x400)
 - [x] demo for base resolution (224x400)
 - [x] GUI for interactive bbox editing
 - [x] train and test code release
 - [x] FID test code
-- [x] config and pretrained weight for high resolution
+- [x] config and checkpoint for high resolution
 
 ## Getting Started
 
@@ -108,7 +109,7 @@ Our training is based on [stable-diffusion-v1-5](https://huggingface.co/runwayml
 
 ## Street-view Generation with MagicDrive
 
-Download our pretrained weight for MagicDrive from 
+Download our model checkpoint for MagicDrive from 
 - 224x400 model: [onedrive](https://mycuhk-my.sharepoint.com/:u:/g/personal/1155157018_link_cuhk_edu_hk/ERiu-lbAvq5IkODTscFXYPUBpVYVDbwjHchDExBlPfeQ0w?e=8YaDM0)
 - 272x736 model: [huggingface](https://huggingface.co/flymin/MagicDrive-272x736-400ep)
 - 424x800 model: [huggingface](https://huggingface.co/flymin/MagicDrive-424x800-450ep)
@@ -201,7 +202,7 @@ accelerate launch --mixed_precision fp16 --gpu_ids all --num_processes 2 tools/t
 After training, you can test your model for driving view generation through:
 ```bash
 python tools/test.py resume_from_checkpoint=${YOUR MODEL}
-# take our pretrained model as an example
+# take our the 224x400 model checkpoint as an example
 python tools/test.py resume_from_checkpoint=./pretrained/SDv1.5mv-rawbox_2023-09-07_18-39_224x400
 ```
 Please find the results in `./magicdrive-log/test/`.

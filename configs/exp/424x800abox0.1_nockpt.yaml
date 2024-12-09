@@ -1,0 +1,17 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_400_map_cache_box_424x800
+  # - /runner/8gpus
+  - model: ../../model/SDv1.5mv_rawbox
+  - _self_  # make sure override
+
+# based on rawbox2.0
+task_id: 424x800abox0.1_nockpt
+runner:
+  validation_show_box: true
+  enable_xformers_memory_efficient_attention: true  # always need this.
+  bbox_add_ratio: 0.1
+
+model:
+  controlnet:
+    map_size: [8, 400, 400]

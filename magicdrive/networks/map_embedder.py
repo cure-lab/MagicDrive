@@ -74,3 +74,53 @@ class BEVControlNetConditioningEmbedding(nn.Module):
         embedding = self.conv_out(embedding)
 
         return embedding
+
+
+class BEVControlNetConditioningEmbeddingPlus(BEVControlNetConditioningEmbedding):
+    def __init__(
+        self,
+        conditioning_embedding_size: Tuple[int],
+        conditioning_embedding_channels: int = 320,
+        conditioning_size: Tuple[int, int, int] = (25, 200, 200),  # only use 25
+        block_out_channels: Tuple[int] = (16, 32, 96, 256),
+    ):
+        super().__init__()
+        # input size   25, 200, 200
+        # output size 320,  32,  88
+
+        self.conv_in = nn.Conv2d(
+            conditioning_size[0], block_out_channels[0], kernel_size=3,
+            padding=1)
+
+        self.blocks = nn.ModuleList([])
+
+        for i in range(len(block_out_channels) - 2):
+            channel_in = block_out_channels[i]
+            channel_out = block_out_channels[i + 1]
+            self.blocks.append(
+                nn.Conv2d(channel_in, channel_in, kernel_size=3, padding=(1, 1))
+            )
+            stride = 1 if i == 0 else 2
+            self.blocks.append(
+                nn.Conv2d(
+                    channel_in, channel_out, kernel_size=3, padding=(1, 1),
+                    stride=stride))
+        channel_in = block_out_channels[-2]
+        channel_out = block_out_channels[-1]
+        self.blocks.append(
+            nn.Conv2d(channel_in, channel_in, kernel_size=3, padding=(1, 1))
+        )
+        self.blocks.append(
+            nn.Conv2d(
+                channel_in, channel_out, kernel_size=3, padding=(1, 1),
+                stride=(2, 1)))
+        self.blocks.append(nn.AdaptiveAvgPool2d(conditioning_embedding_size))
+
+        self.conv_out = zero_module(
+            nn.Conv2d(
+                block_out_channels[-1],
+                conditioning_embedding_channels,
+                kernel_size=3,
+                padding=1,
+            )
+        )

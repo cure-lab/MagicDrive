@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_400_map_cache_box
+
+dataset:
+  image_size: [424, 800]  # rescale 0.48 to 0.5 with smaller cropping
+  augment2d:
+    resize: [[0.5, 0.5]]
+    rotate: null
+
+  back_resize: [848, 1600]  # (h, w)
+  back_pad: [0, 52, 0, 0]  # left, top, right and bottom

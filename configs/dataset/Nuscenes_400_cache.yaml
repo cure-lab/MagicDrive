@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_cache
+
+dataset:
+  map_bound:
+    x: [-50.0, 50.0, 0.25]
+    y: [-50.0, 50.0, 0.25]
+  dataset_cache_file_tag: 26x400x400_map_aux_full

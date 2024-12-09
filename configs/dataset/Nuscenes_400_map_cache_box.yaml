@@ -1,0 +1,160 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_400_cache
+
+# this config only remove object items on map construction
+# map size: (8, 400, 400)
+
+dataset:
+  train_pipeline:
+    -
+      type: LoadMultiViewImageFromFiles
+      to_float32: true
+    -
+      type: LoadAnnotations3D
+      with_bbox_3d: true
+      with_label_3d: true
+      with_attr_label: False
+    -
+      type: ImageAug3D  # random crop and rotate image and generate extrinsics
+      final_dim: ${...image_size}
+      resize_lim: ${...augment2d.resize[0]}  # range for resize ratio
+      bot_pct_lim: [0.0, 0.0]  # this is the ratio in [0, 1] to keep bottom, default only crop top
+      rot_lim: ${...augment2d.rotate}
+      rand_flip: false
+      is_train: false  # is false, range takes mean, disable flip and rotate
+    -
+      type: GlobalRotScaleTrans
+      resize_lim: ${...augment3d.scale}
+      rot_lim: ${...augment3d.rotate}
+      trans_lim: ${...augment3d.translate}
+      is_train: true
+    -
+      type: ObjectNameFilterM  # this removes -1, do not really filter by names
+      classes: ${...object_classes}
+    -
+      type: LoadBEVSegmentationM
+      dataset_root: ${...dataset_root}
+      xbound: ${...map_bound.x}
+      ybound: ${...map_bound.y}
+      classes: ${...map_classes}
+      object_classes: null
+      aux_data: null
+      cache_file: ${...dataset_cache_file.0}
+    - 
+      type: RandomFlip3DwithViews
+      flip_ratio: ${...augment3d.flip_ratio}
+      direction: ${...augment3d.flip_direction}
+    # -
+    #   type: RandomFlip3D  # random flip the whole lidar space
+    # -
+    #   type: PointsRangeFilter
+    #   point_cloud_range: ${point_cloud_range}
+    # -
+    #   type: ObjectRangeFilter
+    #   point_cloud_range: ${point_cloud_range}
+    - 
+      type: ReorderMultiViewImagesM
+      order: ${...view_order}
+      safe: False
+    -
+      type: ImageNormalize
+      mean: [0.5, 0.5, 0.5]
+      std: [0.5, 0.5, 0.5]
+    -
+      type: DefaultFormatBundle3D
+      classes: ${...object_classes}
+    -
+      type: Collect3D
+      keys:  # keep as origin
+        - img
+        # - points
+        - gt_bboxes_3d
+        - gt_labels_3d
+        - gt_masks_bev
+      meta_keys:  # send to DataContainer
+        - camera_intrinsics
+        - lidar2ego
+        - lidar2camera
+        - camera2lidar
+        - lidar2image
+        - img_aug_matrix
+        # - lidar_aug_matrix  # this is useful when we change lidar and box
+      meta_lis_keys:  # hold by one DataContainer
+        - timeofday
+        - location
+        - description
+        - filename
+        - token
+
+  test_pipeline:
+    -
+      type: LoadMultiViewImageFromFiles
+      to_float32: true
+    -
+      type: LoadAnnotations3D
+      with_bbox_3d: true
+      with_label_3d: true
+      with_attr_label: False
+    -
+      type: ImageAug3D  # keep this to perform image resize
+      final_dim: ${...image_size}
+      resize_lim: ${...augment2d.resize[0]}
+      bot_pct_lim: [0.0, 0.0]
+      rot_lim: [0.0, 0.0]
+      rand_flip: false
+      is_train: false
+    -
+      type: GlobalRotScaleTrans  # add `lidar_aug_matrix`
+      resize_lim: ${...augment3d.scale}
+      rot_lim: ${...augment3d.rotate}
+      trans_lim: ${...augment3d.translate}
+      is_train: true
+    -
+      type: ObjectNameFilterM
+      classes: ${...object_classes}
+    -
+      type: LoadBEVSegmentationM
+      dataset_root: ${...dataset_root}
+      xbound: ${...map_bound.x}
+      ybound: ${...map_bound.y}
+      classes: ${...map_classes}
+      object_classes: null
+      aux_data: null
+      cache_file: ${...dataset_cache_file.1}
+    # -
+    #   type: PointsRangeFilter
+    #   point_cloud_range: ${point_cloud_range}
+    - 
+      type: ReorderMultiViewImagesM
+      order: ${...view_order}
+      safe: False
+    -
+      type: ImageNormalize
+      mean: [0.5, 0.5, 0.5]
+      std: [0.5, 0.5, 0.5]
+    -
+      type: DefaultFormatBundle3D
+      classes: ${...object_classes}
+    -
+      type: Collect3D
+      keys:
+        - img
+        # - points
+        - gt_bboxes_3d
+        - gt_labels_3d
+        - gt_masks_bev
+      meta_keys:
+        - camera_intrinsics
+        - lidar2ego
+        - lidar2camera
+        - camera2lidar
+        - lidar2image
+        - img_aug_matrix
+        # - lidar_aug_matrix
+      meta_lis_keys:
+        - timeofday
+        - location
+        - description
+        - filename
+        - token

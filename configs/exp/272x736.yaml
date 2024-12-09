@@ -1,0 +1,22 @@
+# @package _global_
+defaults:
+  - /dataset/Nuscenes_map_cache_box_272x736
+  # - /runner/8gpus
+  - model: ../../model/SDv1.5mv_rawbox
+  - _self_  # make sure override
+
+# based on rawbox2.0
+task_id: 272x736
+runner:
+  validation_show_box: true
+  enable_xformers_memory_efficient_attention: true  # always need this.
+  enable_unet_checkpointing: true
+
+model:
+  controlnet:
+    map_size: null
+    map_embedder_cls: magicdrive.networks.map_embedder.BEVControlNetConditioningEmbeddingPlus
+    map_embedder_param:
+      conditioning_embedding_size: [34, 92]
+      conditioning_size: [8, 200, 200]
+      block_out_channels: ${..conditioning_embedding_out_channels}

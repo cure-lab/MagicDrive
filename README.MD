@@ -96,7 +96,7 @@ Our default log directory is `${ROOT}/magicdrive-log`. Please be prepared.
 
 ### Pretrained Weights
 
-Our training is based on [stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5). We assume you put them at `${ROOT}/pretrained/` as follows:
+Our training is based on [stable-diffusion-v1-5](https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5). We assume you put them at `${ROOT}/pretrained/` as follows:
 
 ```bash
 {ROOT}/pretrained/stable-diffusion-v1-5/

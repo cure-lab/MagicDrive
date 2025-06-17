@@ -1,0 +1,98 @@
+[tool.poetry]
+name = "magicdrive"
+version = "0.1.0"
+description = "MagicDrive: Street-view generation framework using diffusion models"
+authors = ["MagicDrive Team"]
+readme = "README.md"
+python = "^3.7"
+packages = [{include = "magicdrive"}]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+torch = "1.10.2"
+torchvision = "0.11.3"
+tensorboard = "2.11.2"
+hydra-core = "1.3.0"
+urllib3 = "1.26.12"
+h5py = ">=3.8.0"
+einops = "0.3.2"
+accelerate = "0.20.3"
+transformers = "4.27.4"
+mmcv-full = "1.4.5"
+Pillow = "8.4.0"
+nuscenes-devkit = "*"
+numpy = "1.21.6"
+numba = "0.53.0"
+llvmlite = "0.36.0"
+mmdet = "2.20.0"
+opencv-python = "4.6.0.66"
+ninja = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.0"
+pytest-cov = "^4.0.0"
+pytest-mock = "^3.10.0"
+
+[tool.poetry.scripts]
+test = "pytest"
+tests = "pytest"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--cov=magicdrive",
+    "--cov-branch",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml:coverage.xml",
+    "--cov-fail-under=80",
+    "-v",
+    "--tb=short",
+    "--color=yes"
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow running tests"
+]
+
+[tool.coverage.run]
+source = ["magicdrive"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/third_party/*",
+    "*/demo/*",
+    "*/tools/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod"
+]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
